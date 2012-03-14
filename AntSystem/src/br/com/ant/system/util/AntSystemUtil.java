@@ -1,4 +1,4 @@
-package br.com.ant.system.app;
+package br.com.ant.system.util;
 
 public class AntSystemUtil {
 
