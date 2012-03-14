@@ -16,7 +16,7 @@ public class PercursoController {
 	private Map<Cidade, List<Caminho>>	mapPercurso		= new HashMap<Cidade, List<Caminho>>();
 
 	private List<Caminho>				melhorTrajeto	= new LinkedList<Caminho>();
-	private float						menorDistanciaPercorrida;
+	private double						menorDistanciaPercorrida;
 
 	public void addPercurso(Cidade cidadeOrigem, Cidade cidadeDestino, float distancia) {
 		Caminho caminho = new Caminho(cidadeOrigem, cidadeDestino, distancia);
@@ -73,7 +73,7 @@ public class PercursoController {
 		return melhorTrajeto;
 	}
 
-	public float getMenorDistanciaPercorrida() {
+	public double getMenorDistanciaPercorrida() {
 		return menorDistanciaPercorrida;
 	}
 
@@ -85,7 +85,7 @@ public class PercursoController {
 		}
 	}
 
-	public void setMenorDistanciaPercorrida(float menorDistanciaPercorrida) {
+	public void setMenorDistanciaPercorrida(double menorDistanciaPercorrida) {
 		this.menorDistanciaPercorrida = menorDistanciaPercorrida;
 	}
 

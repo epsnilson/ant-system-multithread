@@ -13,8 +13,8 @@ import br.com.ant.system.util.AntSystemUtil;
 
 public class FormigaController {
 	private static final int	MAXIMO_INTERACOES	= 50;
-	private static final float	FEROMONIO_INICIAL	= 0.0F;
-	private static final float	MINIMO_FEROMONIO	= 2F;
+	private static final double	FEROMONIO_INICIAL	= 0.0;
+	private static final double	MINIMO_FEROMONIO	= 2;
 
 	private List<Formiga>		formigas;
 	private PercursoController	percursoController;
@@ -69,7 +69,7 @@ public class FormigaController {
 			distancia += caminho.getDistancia();
 
 			// Atualiza o feromonio
-			caminho.getFeromonio().addFeromonio();
+			caminho.getFeromonio().addQntFeromonio();
 		}
 
 		// Atualiza as estatiscas dos melhores caminhos
@@ -82,7 +82,7 @@ public class FormigaController {
 	public Caminho escolherPercurso(Formiga formiga, List<Caminho> todasAlternativas) {
 		Map<Cidade, Caminho> mapCaminhosDisponiveis = new HashMap<Cidade, Caminho>();
 		List<Cidade> cidadesDisponiveis = new ArrayList<Cidade>();
-		float maiorFeromonio = FEROMONIO_INICIAL;
+		double maiorFeromonio = FEROMONIO_INICIAL;
 		Caminho distanciaMaiorFeromonio = null;
 
 		for (Caminho d : todasAlternativas) {
@@ -90,8 +90,8 @@ public class FormigaController {
 				mapCaminhosDisponiveis.put(d.getCidadeDestino(), d);
 				cidadesDisponiveis.add(d.getCidadeDestino());
 
-				if (d.getFeromonio().getFeromonio() >= MINIMO_FEROMONIO && d.getFeromonio().getFeromonio() > maiorFeromonio) {
-					maiorFeromonio = d.getFeromonio().getFeromonio();
+				if (d.getFeromonio().getQntFeromonio() >= MINIMO_FEROMONIO && d.getFeromonio().getQntFeromonio() > maiorFeromonio) {
+					maiorFeromonio = d.getFeromonio().getQntFeromonio();
 					distanciaMaiorFeromonio = d;
 				}
 
