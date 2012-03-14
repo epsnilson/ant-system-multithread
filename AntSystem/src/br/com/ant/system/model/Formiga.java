@@ -13,10 +13,11 @@ public class Formiga {
 	private Cidade			localizacaoCidadeInicial;
 	private Set<Cidade>		cidadesVisitadas	= new HashSet<Cidade>();
 	private List<Caminho>	trajetoCidades		= new LinkedList<Caminho>();
+	private double			distanciaPercorrida;
 
 	public Formiga(int number, Cidade localizacaoAtual) {
 		if (localizacaoAtual == null) {
-			throw new RuntimeException("Localizacao atual nao pode ser null");
+			throw new RuntimeException("Localizacao atual nao pode ser nula");
 		}
 
 		this.cidadesVisitadas.add(localizacaoAtual);
@@ -40,6 +41,7 @@ public class Formiga {
 	public void addCaminho(Caminho caminho) {
 		this.cidadesVisitadas.add(caminho.getCidadeDestino());
 		this.trajetoCidades.add(caminho);
+		this.distanciaPercorrida += caminho.getDistancia();
 
 		this.localizacaoCidadeAtual = caminho.getCidadeDestino();
 	}
@@ -51,6 +53,7 @@ public class Formiga {
 	public void clear(Cidade localizacaoAtual) {
 		this.trajetoCidades.clear();
 		this.cidadesVisitadas.clear();
+		this.distanciaPercorrida = 0.0;
 
 		this.localizacaoCidadeAtual = localizacaoAtual;
 		this.localizacaoCidadeInicial = localizacaoAtual;
@@ -76,9 +79,15 @@ public class Formiga {
 		buffer.append("\n");
 		buffer.append("Trajetos: ");
 		buffer.append(Arrays.toString(trajetoCidades.toArray()));
+		buffer.append("DistanciaPercorrida: ");
+		buffer.append(distanciaPercorrida);
 		buffer.append("\n");
 
 		return buffer.toString();
+	}
+	
+	public double getDistanciaPercorrida() {
+		return distanciaPercorrida;
 	}
 
 }
