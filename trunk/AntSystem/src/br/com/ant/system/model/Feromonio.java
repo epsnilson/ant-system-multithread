@@ -1,13 +1,13 @@
 package br.com.ant.system.model;
 
 public class Feromonio {
-		  private float feromonio;
+	private double	qntFeromonio;
 
-		  public void addFeromonio() {
-					feromonio += 1;
-		  }
+	public void addQntFeromonio() {
+		qntFeromonio += 1;
+	}
 
-		  public float getFeromonio() {
-					return feromonio;
-		  }
+	public double getQntFeromonio() {
+		return qntFeromonio;
+	}
 }
