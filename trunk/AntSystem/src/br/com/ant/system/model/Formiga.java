@@ -7,72 +7,78 @@ import java.util.List;
 import java.util.Set;
 
 public class Formiga {
-		  private int			 number;
-		  private Cidade		  localizacaoCidadeAtual;
-		  private Set<Cidade>	 cidadesVisitadas = new HashSet<Cidade>();
-		  private List<Caminho> trajetoCidades   = new LinkedList<Caminho>();
+	private int				id;
 
-		  public Formiga(int number, Cidade localizacaoAtual) {
-					if (localizacaoAtual == null) {
-							  throw new RuntimeException("Localizacao atual nao pode ser null");
-					}
+	private Cidade			localizacaoCidadeAtual;
+	private Cidade			localizacaoCidadeInicial;
+	private Set<Cidade>		cidadesVisitadas	= new HashSet<Cidade>();
+	private List<Caminho>	trajetoCidades		= new LinkedList<Caminho>();
 
-					this.cidadesVisitadas.add(localizacaoAtual);
-					this.localizacaoCidadeAtual = localizacaoAtual;
-					this.number = number;
-		  }
+	public Formiga(int number, Cidade localizacaoAtual) {
+		if (localizacaoAtual == null) {
+			throw new RuntimeException("Localizacao atual nao pode ser null");
+		}
 
-		  public int getNumber() {
-					return number;
-		  }
+		this.cidadesVisitadas.add(localizacaoAtual);
+		this.localizacaoCidadeAtual = localizacaoAtual;
+		this.localizacaoCidadeInicial = localizacaoAtual;
+		this.id = number;
+	}
 
-		  public void setNumber(int number) {
-					this.number = number;
-		  }
+	public int getId() {
+		return id;
+	}
 
-		  public void setLocalizacaoCidadeAtual(Cidade localizacaoCidadeAtual) {
-					this.localizacaoCidadeAtual = localizacaoCidadeAtual;
-		  }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-		  public Cidade getLocalizacaoCidadeAtual() {
-					return localizacaoCidadeAtual;
-		  }
+	public Cidade getLocalizacaoCidadeAtual() {
+		return localizacaoCidadeAtual;
+	}
 
-		  public void addCaminho(Caminho caminho) {
-					cidadesVisitadas.add(caminho.getCidadeDestino());
-					trajetoCidades.add(caminho);
-					
-					this.setLocalizacaoCidadeAtual(caminho.getCidadeDestino());
-		  }
+	public void addCaminho(Caminho caminho) {
+		this.cidadesVisitadas.add(caminho.getCidadeDestino());
+		this.trajetoCidades.add(caminho);
 
-		  public List<Caminho> getTrajetoCidades() {
-					return trajetoCidades;
-		  }
+		this.localizacaoCidadeAtual = caminho.getCidadeDestino();
+	}
 
-		  public void clear() {
-					trajetoCidades.clear();
-					cidadesVisitadas.clear();
-		  }
+	public List<Caminho> getTrajetoCidades() {
+		return trajetoCidades;
+	}
 
-		  public boolean isCidadeVisitada(Cidade cidade) {
-					return cidadesVisitadas.contains(cidade);
-		  }
+	public void clear(Cidade localizacaoAtual) {
+		this.trajetoCidades.clear();
+		this.cidadesVisitadas.clear();
 
-		  public Set<Cidade> getCidadesVisitadas() {
-					return cidadesVisitadas;
-		  }
+		this.localizacaoCidadeAtual = localizacaoAtual;
+		this.localizacaoCidadeInicial = localizacaoAtual;
+	}
 
-		  @Override
-		  public String toString() {
-					StringBuffer buffer = new StringBuffer();
-					buffer.append("Numero:");
-					buffer.append(number);
-					buffer.append("\n");
-					buffer.append("Trajetos: ");
-					buffer.append(Arrays.toString(trajetoCidades.toArray()));
-					buffer.append("\n");
+	public boolean isCidadeVisitada(Cidade cidade) {
+		return cidadesVisitadas.contains(cidade);
+	}
 
-					return buffer.toString();
-		  }
+	public Set<Cidade> getCidadesVisitadas() {
+		return cidadesVisitadas;
+	}
+
+	public Cidade getLocalizacaoCidadeInicial() {
+		return localizacaoCidadeInicial;
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("Numero:");
+		buffer.append(id);
+		buffer.append("\n");
+		buffer.append("Trajetos: ");
+		buffer.append(Arrays.toString(trajetoCidades.toArray()));
+		buffer.append("\n");
+
+		return buffer.toString();
+	}
 
 }
