@@ -7,22 +7,30 @@ import java.util.Map;
 import br.com.ant.system.model.Caminho;
 
 /**
- * Classe responsavel por efetuar os calculos de acordo com o especificado pelo algoritmo ACS (Ant
- * Colony System)
+ * Classe responsavel por efetuar os calculos de acordo com o especificado pelo algoritmo AS (Ant
+ * System)
  * 
  * @author Jackson Sildu
  * 
  */
-public class ACOAlgoritmoUtil {
+public class ASAlgoritmo {
 
+	/*
+	 * Quantidade de feromonio incrementado por uma formiga. Dorico recomenda valores entre 0 e 1.
+	 */
+	private double	quantidadeFeromonioIncrementado	= 1.0;
+	/*
+	 * Dorigo recomenda que a taxa de evaporação com 0.5
+	 */
+	private double	taxaEvaporacaoFeromonio			= 0.5;
 	/*
 	 * Dorigo recomenda que a importancia do feromonio fique em torno de 1.
 	 */
-	private double	pesoFeromonio		= 1;
+	private double	pesoFeromonio					= 1;
 	/*
 	 * Dorigo recomenda que a importancia da visibilidade do cidade fique em torno de 5.
 	 */
-	private double	pesoVisibilidade	= 5;
+	private double	pesoVisibilidade				= 5;
 
 	/**
 	 * Escolhe o Melhor caminho apartir dos caminhos disponiveis e do algoritmo proposto pelo
@@ -85,6 +93,36 @@ public class ACOAlgoritmoUtil {
 		return probabilidadeCaminho;
 	}
 
+	/**
+	 * Efetua o calculo de evaporação do feromonio
+	 * 
+	 * @param qntFeromonioAtual
+	 *            Quantidade atual de feromonio presente no caminho
+	 * @return
+	 */
+	private double evaporacaoFeromonio(double qntFeromonioAtual) {
+		double novaQntFeromonio = (1 - taxaEvaporacaoFeromonio) * qntFeromonioAtual;
+
+		return novaQntFeromonio;
+	}
+
+	/**
+	 * Atualiza a quantidade de feromonio do caminho.
+	 * 
+	 * @param qntFeromonioAtual
+	 *            Quantidade de feromonio atual,
+	 * @param distanciaPercurso
+	 *            Distancia total da viagem percorrida pela formiga.
+	 * @return Retorna a quantidade do novo feromonio
+	 */
+	public double atualizarFeromonio(double qntFeromonioAtual, double distanciaPercurso) {
+		double quantidadeFeromonioDepositada = quantidadeFeromonioIncrementado / distanciaPercurso;
+
+		double novaQntFeromonio = this.evaporacaoFeromonio(qntFeromonioAtual) + quantidadeFeromonioDepositada;
+
+		return novaQntFeromonio;
+	}
+
 	public double getPesoFeromonio() {
 		return pesoFeromonio;
 	}
@@ -109,6 +147,21 @@ public class ACOAlgoritmoUtil {
 	 */
 	public void setPesoVisibilidade(double pesoVisibilidade) {
 		this.pesoVisibilidade = pesoVisibilidade;
+	}
+
+	/**
+	 * Inicializa a quantidade de feromonio no caminho.
+	 * 
+	 * @param caminhos
+	 *            Colecao com todos os caminhos.
+	 * @param qntTotalCidades
+	 *            Quantidade total de cidaes.
+	 */
+	public void inicializarFeromonio(List<Caminho> caminhos, int qntTotalCidades) {
+		for (Caminho c : caminhos) {
+			double feromonioInicial = 1 / (qntTotalCidades * c.getDistancia());
+			c.getFeromonio().setQntFeromonio(feromonioInicial);
+		}
 	}
 
 }

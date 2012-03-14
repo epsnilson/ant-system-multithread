@@ -7,6 +7,7 @@ import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
+import br.com.ant.system.util.ASAlgoritmo;
 import br.com.ant.system.util.AntSystemUtil;
 
 public class AntSystemApp {
@@ -54,9 +55,11 @@ public class AntSystemApp {
 			formigas.add(formiga);
 		}
 
-		FormigaController controller = new FormigaController(formigas, percurso);
+		ASAlgoritmo algoritmo = new ASAlgoritmo();
 
-		controller.inicializar();
+		FormigaController controller = new FormigaController(formigas, percurso, algoritmo);
+
+		controller.executarAlgoritmo();
 
 		System.out.println("Finalizando aplicação...");
 	}
