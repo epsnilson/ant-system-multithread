@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import br.com.ant.system.model.Caminho;
 
 /**
@@ -32,6 +34,8 @@ public class ASAlgoritmo {
 	 */
 	private double	pesoVisibilidade				= 5;
 
+	private Logger	logger							= Logger.getLogger(this.getClass());
+
 	/**
 	 * Escolhe o Melhor caminho apartir dos caminhos disponiveis e do algoritmo proposto pelo
 	 * algoritmo padrão do AS(Ant System)
@@ -45,10 +49,13 @@ public class ASAlgoritmo {
 
 		for (Caminho c : caminhosDisponiveis) {
 			double probabilidadeCaminho = this.calcularProbabilidadeCaminho(c);
+			logger.debug("Custo caminho " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + probabilidadeCaminho);
 
 			mapProbabilidade.put(c, probabilidadeCaminho);
 			somaProbabilidades += probabilidadeCaminho;
 		}
+
+		logger.debug("Soma de Probabilidades: " + somaProbabilidades);
 
 		return buscarMelhorCaminho(mapProbabilidade, somaProbabilidades);
 
@@ -68,13 +75,15 @@ public class ASAlgoritmo {
 		Caminho melhorCaminho = null;
 		for (Caminho c : mapProbabilidade.keySet()) {
 			double probabilidade = mapProbabilidade.get(c) / somaProbabilidades;
+			logger.debug("Probabilidade " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + probabilidade);
 
 			if (melhorProbabilidade == 0 || probabilidade > melhorProbabilidade) {
 				melhorProbabilidade = probabilidade;
 				melhorCaminho = c;
 			}
-
 		}
+
+		logger.info("Caminho escolhido: " + melhorCaminho.toString());
 
 		return melhorCaminho;
 	}
@@ -102,6 +111,7 @@ public class ASAlgoritmo {
 	 */
 	private double evaporacaoFeromonio(double qntFeromonioAtual) {
 		double novaQntFeromonio = (1 - taxaEvaporacaoFeromonio) * qntFeromonioAtual;
+		logger.debug("Quantidade feromonio apos evaporacao: " + novaQntFeromonio);
 
 		return novaQntFeromonio;
 	}
@@ -116,9 +126,15 @@ public class ASAlgoritmo {
 	 * @return Retorna a quantidade do novo feromonio
 	 */
 	public double atualizarFeromonio(double qntFeromonioAtual, double distanciaPercurso) {
+		logger.debug("Atualizando quantidade de feromonio...");
+		logger.debug("Quanidade de Feromonio atual: " + qntFeromonioAtual);
+		logger.debug("Distancia percorrida pela formiga: " + distanciaPercurso);
+
 		double quantidadeFeromonioDepositada = quantidadeFeromonioIncrementado / distanciaPercurso;
 
 		double novaQntFeromonio = this.evaporacaoFeromonio(qntFeromonioAtual) + quantidadeFeromonioDepositada;
+
+		logger.debug("Nova quantidade de feromonio gerado: " + novaQntFeromonio);
 
 		return novaQntFeromonio;
 	}

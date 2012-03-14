@@ -12,7 +12,7 @@ import br.com.ant.system.model.Formiga;
 
 public class PercursoController {
 
-	private List<Cidade>				cidades			= new ArrayList<Cidade>();
+	private List<Cidade>				cidadesPercurso	= new ArrayList<Cidade>();
 	private Map<Cidade, List<Caminho>>	mapPercurso		= new HashMap<Cidade, List<Caminho>>();
 
 	private List<Caminho>				melhorTrajeto	= new LinkedList<Caminho>();
@@ -22,12 +22,12 @@ public class PercursoController {
 		Caminho caminho = new Caminho(cidadeOrigem, cidadeDestino, distancia);
 		Caminho caminhoInverso = new Caminho(cidadeDestino, cidadeOrigem, distancia);
 
-		if (!cidades.contains(cidadeOrigem)) {
-			cidades.add(cidadeOrigem);
+		if (!cidadesPercurso.contains(cidadeOrigem)) {
+			cidadesPercurso.add(cidadeOrigem);
 		}
 
-		if (!cidades.contains(cidadeDestino)) {
-			cidades.add(cidadeDestino);
+		if (!cidadesPercurso.contains(cidadeDestino)) {
+			cidadesPercurso.add(cidadeDestino);
 		}
 
 		this.addtoMapPercurso(cidadeOrigem, caminho);
@@ -46,8 +46,8 @@ public class PercursoController {
 		}
 	}
 
-	public List<Cidade> getCidades() {
-		return cidades;
+	public List<Cidade> getCidadesPercurso() {
+		return cidadesPercurso;
 	}
 
 	public Map<Cidade, List<Caminho>> getMapPercurso() {
@@ -60,7 +60,7 @@ public class PercursoController {
 
 	public boolean isFinalizouPercurso(Formiga formiga) {
 		boolean terminado = false;
-		if (cidades.size() == formiga.getCidadesVisitadas().size()) {
+		if (cidadesPercurso.size() == formiga.getCidadesVisitadas().size()) {
 			if (formiga.getLocalizacaoCidadeAtual().equals(formiga.getLocalizacaoCidadeInicial())) {
 				terminado = true;
 			}
