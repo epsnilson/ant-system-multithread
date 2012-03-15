@@ -20,88 +20,87 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class Formiga {
-	private int				id;
+public class Formiga implements Cloneable {
+		  private int		   id;
 
-	private Cidade			localizacaoCidadeAtual;
-	private Cidade			localizacaoCidadeInicial;
-	private Set<Cidade>		cidadesVisitadas	= new HashSet<Cidade>();
-	private List<Caminho>	trajetoCidades		= new LinkedList<Caminho>();
-	private double			distanciaPercorrida;
+		  private Cidade		localizacaoCidadeAtual;
+		  private Cidade		localizacaoCidadeInicial;
+		  private Set<Cidade>   cidadesVisitadas = new HashSet<Cidade>();
+		  private List<Caminho> trajetoCidades   = new LinkedList<Caminho>();
+		  private double		distanciaPercorrida;
 
-	public Formiga(int number, Cidade localizacaoAtual) {
-		if (localizacaoAtual == null) {
-			throw new RuntimeException("Localizacao atual nao pode ser nula");
-		}
+		  public Formiga(int number, Cidade localizacaoAtual) {
+					if (localizacaoAtual == null) {
+							  throw new RuntimeException("Localizacao atual nao pode ser nula");
+					}
 
-		this.cidadesVisitadas.add(localizacaoAtual);
-		this.localizacaoCidadeAtual = localizacaoAtual;
-		this.localizacaoCidadeInicial = localizacaoAtual;
-		this.id = number;
-	}
+					this.cidadesVisitadas.add(localizacaoAtual);
+					this.localizacaoCidadeAtual = localizacaoAtual;
+					this.localizacaoCidadeInicial = localizacaoAtual;
+					this.id = number;
+		  }
 
-	public int getId() {
-		return id;
-	}
+		  public int getId() {
+					return id;
+		  }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+		  public void setId(int id) {
+					this.id = id;
+		  }
 
-	public Cidade getLocalizacaoCidadeAtual() {
-		return localizacaoCidadeAtual;
-	}
+		  public Cidade getLocalizacaoCidadeAtual() {
+					return localizacaoCidadeAtual;
+		  }
 
-	public void addCaminho(Caminho caminho) {
-		this.cidadesVisitadas.add(caminho.getCidadeDestino());
-		this.trajetoCidades.add(caminho);
-		this.distanciaPercorrida += caminho.getDistancia();
+		  public void addCaminho(Caminho caminho) {
+					this.cidadesVisitadas.add(caminho.getCidadeDestino());
+					this.trajetoCidades.add(caminho);
+					this.distanciaPercorrida += caminho.getDistancia();
 
-		this.localizacaoCidadeAtual = caminho.getCidadeDestino();
-	}
+					this.localizacaoCidadeAtual = caminho.getCidadeDestino();
+		  }
 
-	public List<Caminho> getTrajetoCidades() {
-		return trajetoCidades;
-	}
+		  public List<Caminho> getTrajetoCidades() {
+					return trajetoCidades;
+		  }
 
-	public void clear(Cidade localizacaoAtual) {
-		this.trajetoCidades.clear();
-		this.cidadesVisitadas.clear();
-		this.distanciaPercorrida = 0.0;
+		  public void clear(Cidade localizacaoAtual) {
+					this.trajetoCidades.clear();
+					this.cidadesVisitadas.clear();
+					this.distanciaPercorrida = 0.0;
 
-		this.localizacaoCidadeAtual = localizacaoAtual;
-		this.localizacaoCidadeInicial = localizacaoAtual;
-	}
+					this.localizacaoCidadeAtual = localizacaoAtual;
+					this.localizacaoCidadeInicial = localizacaoAtual;
+		  }
 
-	public boolean isCidadeVisitada(Cidade cidade) {
-		return cidadesVisitadas.contains(cidade);
-	}
+		  public boolean isCidadeVisitada(Cidade cidade) {
+					return cidadesVisitadas.contains(cidade);
+		  }
 
-	public Set<Cidade> getCidadesVisitadas() {
-		return cidadesVisitadas;
-	}
+		  public Set<Cidade> getCidadesVisitadas() {
+					return cidadesVisitadas;
+		  }
 
-	public Cidade getLocalizacaoCidadeInicial() {
-		return localizacaoCidadeInicial;
-	}
+		  public Cidade getLocalizacaoCidadeInicial() {
+					return localizacaoCidadeInicial;
+		  }
 
-	@Override
-	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("Numero:");
-		buffer.append(id);
-		buffer.append("\n");
-		buffer.append("Trajetos: ");
-		buffer.append(Arrays.toString(trajetoCidades.toArray()));
-		buffer.append("DistanciaPercorrida: ");
-		buffer.append(distanciaPercorrida);
-		buffer.append("\n");
+		  @Override
+		  public String toString() {
+					StringBuffer buffer = new StringBuffer();
+					buffer.append("Numero:");
+					buffer.append(id);
+					buffer.append("\n");
+					buffer.append("Trajetos: ");
+					buffer.append(Arrays.toString(trajetoCidades.toArray()));
+					buffer.append("DistanciaPercorrida: ");
+					buffer.append(distanciaPercorrida);
+					buffer.append("\n");
 
-		return buffer.toString();
-	}
+					return buffer.toString();
+		  }
 
-	public double getDistanciaPercorrida() {
-		return distanciaPercorrida;
-	}
-
+		  public double getDistanciaPercorrida() {
+					return distanciaPercorrida;
+		  }
 }

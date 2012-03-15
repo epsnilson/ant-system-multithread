@@ -26,81 +26,89 @@ import br.com.ant.system.model.Formiga;
 
 public class PercursoController {
 
-	private List<Cidade>				cidadesPercurso	= new ArrayList<Cidade>();
-	private Map<Cidade, List<Caminho>>	mapPercurso		= new HashMap<Cidade, List<Caminho>>();
+		  private List<Cidade>			   cidadesPercurso	 = new ArrayList<Cidade>();
+		  private List<Caminho>			  caminhosDisponiveis = new ArrayList<Caminho>();
+		  private Map<Cidade, List<Caminho>> mapPercurso		 = new HashMap<Cidade, List<Caminho>>();
 
-	private List<Caminho>				melhorTrajeto	= new LinkedList<Caminho>();
-	private double						menorDistanciaPercorrida;
+		  private List<Caminho>			  melhorTrajeto	   = new LinkedList<Caminho>();
+		  private double					 menorDistanciaPercorrida;
 
-	public void addPercurso(Cidade cidadeOrigem, Cidade cidadeDestino, float distancia) {
-		Caminho caminho = new Caminho(cidadeOrigem, cidadeDestino, distancia);
-		Caminho caminhoInverso = new Caminho(cidadeDestino, cidadeOrigem, distancia);
+		  public void addPercurso(Cidade cidadeOrigem, Cidade cidadeDestino, float distancia) {
+					Caminho caminho = new Caminho(cidadeOrigem, cidadeDestino, distancia);
+					Caminho caminhoInverso = new Caminho(cidadeDestino, cidadeOrigem, distancia);
 
-		if (!cidadesPercurso.contains(cidadeOrigem)) {
-			cidadesPercurso.add(cidadeOrigem);
-		}
+					this.caminhosDisponiveis.add(caminho);
+					this.caminhosDisponiveis.add(caminhoInverso);
 
-		if (!cidadesPercurso.contains(cidadeDestino)) {
-			cidadesPercurso.add(cidadeDestino);
-		}
+					if (!cidadesPercurso.contains(cidadeOrigem)) {
+							  cidadesPercurso.add(cidadeOrigem);
+					}
 
-		this.addtoMapPercurso(cidadeOrigem, caminho);
-		this.addtoMapPercurso(cidadeDestino, caminhoInverso);
-	}
+					if (!cidadesPercurso.contains(cidadeDestino)) {
+							  cidadesPercurso.add(cidadeDestino);
+					}
 
-	private void addtoMapPercurso(Cidade cidadeOrigem, Caminho caminho) {
-		List<Caminho> caminhos;
-		if (mapPercurso.containsKey(cidadeOrigem)) {
-			caminhos = mapPercurso.get(cidadeOrigem);
-			caminhos.add(caminho);
-		} else {
-			caminhos = new ArrayList<Caminho>();
-			caminhos.add(caminho);
-			mapPercurso.put(cidadeOrigem, caminhos);
-		}
-	}
+					this.addtoMapPercurso(cidadeOrigem, caminho);
+					this.addtoMapPercurso(cidadeDestino, caminhoInverso);
+		  }
 
-	public List<Cidade> getCidadesPercurso() {
-		return cidadesPercurso;
-	}
+		  private void addtoMapPercurso(Cidade cidadeOrigem, Caminho caminho) {
+					List<Caminho> caminhos;
+					if (mapPercurso.containsKey(cidadeOrigem)) {
+							  caminhos = mapPercurso.get(cidadeOrigem);
+							  caminhos.add(caminho);
+					} else {
+							  caminhos = new ArrayList<Caminho>();
+							  caminhos.add(caminho);
+							  mapPercurso.put(cidadeOrigem, caminhos);
+					}
+		  }
 
-	public Map<Cidade, List<Caminho>> getMapPercurso() {
-		return mapPercurso;
-	}
+		  public List<Cidade> getCidadesPercurso() {
+					return cidadesPercurso;
+		  }
 
-	public List<Caminho> getAlternativas(Cidade cidade) {
-		return mapPercurso.get(cidade);
-	}
+		  public Map<Cidade, List<Caminho>> getMapPercurso() {
+					return mapPercurso;
+		  }
 
-	public boolean isFinalizouPercurso(Formiga formiga) {
-		boolean terminado = false;
-		if (cidadesPercurso.size() == formiga.getCidadesVisitadas().size()) {
-			if (formiga.getLocalizacaoCidadeAtual().equals(formiga.getLocalizacaoCidadeInicial())) {
-				terminado = true;
-			}
-		}
+		  public List<Caminho> getAlternativas(Cidade cidade) {
+					return mapPercurso.get(cidade);
+		  }
 
-		return terminado;
-	}
+		  public boolean isFinalizouPercurso(Formiga formiga) {
+					boolean terminado = false;
+					if (cidadesPercurso.size() == formiga.getCidadesVisitadas().size()) {
+							  if (formiga.getLocalizacaoCidadeAtual().equals(formiga.getLocalizacaoCidadeInicial())) {
+										terminado = true;
+							  }
+					}
 
-	public List<Caminho> getMelhorTrajeto() {
-		return melhorTrajeto;
-	}
+					return terminado;
+		  }
 
-	public double getMenorDistanciaPercorrida() {
-		return menorDistanciaPercorrida;
-	}
+		  public List<Caminho> getMelhorTrajeto() {
+					return melhorTrajeto;
+		  }
 
-	public void setMelhorTrajeto(List<Caminho> melhorTrajeto) {
-		this.melhorTrajeto.clear();
-		for (int i = 0; i < melhorTrajeto.size(); i++) {
-			Caminho c = melhorTrajeto.get(i);
-			this.melhorTrajeto.add(c);
-		}
-	}
+		  public double getMenorDistanciaPercorrida() {
+					return menorDistanciaPercorrida;
+		  }
 
-	public void setMenorDistanciaPercorrida(double menorDistanciaPercorrida) {
-		this.menorDistanciaPercorrida = menorDistanciaPercorrida;
-	}
+		  public void setMelhorTrajeto(List<Caminho> melhorTrajeto) {
+					this.melhorTrajeto.clear();
+					for (int i = 0; i < melhorTrajeto.size(); i++) {
+							  Caminho c = melhorTrajeto.get(i);
+							  this.melhorTrajeto.add(c);
+					}
+		  }
+
+		  public void setMenorDistanciaPercorrida(double menorDistanciaPercorrida) {
+					this.menorDistanciaPercorrida = menorDistanciaPercorrida;
+		  }
+
+		  public List<Caminho> getCaminhosDisponiveis() {
+					return caminhosDisponiveis;
+		  }
 
 }
