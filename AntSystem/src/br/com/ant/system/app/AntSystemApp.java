@@ -17,11 +17,11 @@ package br.com.ant.system.app;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
-import br.com.ant.system.util.ASAlgoritmo;
 import br.com.ant.system.util.AntSystemUtil;
 
 public class AntSystemApp {

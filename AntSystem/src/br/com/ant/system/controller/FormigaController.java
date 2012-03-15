@@ -20,109 +20,112 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
-import br.com.ant.system.util.ASAlgoritmo;
 import br.com.ant.system.util.AntSystemUtil;
 
 public class FormigaController {
-	private static final int	MAXIMO_INTERACOES	= 1;
+		  private static final int   MAXIMO_INTERACOES = 50;
 
-	private List<Formiga>		formigas;
-	private PercursoController	percursoController;
-	private ASAlgoritmo			algoritmo;
+		  private List<Formiga>	  formigas;
+		  private PercursoController percursoController;
+		  private ASAlgoritmo		algoritmo;
 
-	private Logger				logger				= Logger.getLogger(this.getClass());
+		  private Logger			 logger			= Logger.getLogger(this.getClass());
 
-	public FormigaController(List<Formiga> formigas, PercursoController percurso, ASAlgoritmo algoritmo) {
-		this.formigas = formigas;
-		this.percursoController = percurso;
-		this.algoritmo = algoritmo;
-	}
+		  public FormigaController(List<Formiga> formigas, PercursoController percurso, ASAlgoritmo algoritmo) {
+					this.formigas = formigas;
+					this.percursoController = percurso;
+					this.algoritmo = algoritmo;
 
-	/**
-	 * Inicia o execução do algoritmo
-	 */
-	public void executarAlgoritmo() {
-		logger.info("Iniciando a execução do Algoritmo...");
-		logger.info("Maximo Interacoes: " + MAXIMO_INTERACOES);
-		logger.info("Quantidade de formigas: " + formigas.size());
-		logger.info("Quantidade de cidades: " + percursoController.getCidadesPercurso());
+					algoritmo.inicializarFeromonio(percurso.getCaminhosDisponiveis(), percurso.getCidadesPercurso().size());
 
-		for (int i = 0; i < MAXIMO_INTERACOES; i++) {
-			logger.info("************** Iteracao N. " + i + " ******************");
-			for (Formiga formiga : formigas) {
-				// Recupera as alternativas para o trajeto de cada formiga
-				List<Caminho> alternativas = percursoController.getAlternativas(formiga.getLocalizacaoCidadeAtual());
+		  }
 
-				// Recupera o melhor trajeto que a formiga pode escolher
-				Caminho caminhoEscolhido = this.escolherPercurso(formiga, alternativas);
+		  /**
+		   * Inicia o execução do algoritmo
+		   */
+		  public void executarAlgoritmo() {
+					logger.info("Iniciando a execução do Algoritmo...");
+					logger.info("Maximo Interacoes: " + MAXIMO_INTERACOES);
+					logger.info("Quantidade de formigas: " + formigas.size());
+					logger.info("Quantidade de cidades: " + percursoController.getCidadesPercurso());
 
-				// atualiza a localização atual da formiga e o estado da cidade.
-				formiga.addCaminho(caminhoEscolhido);
+					for (int i = 0; i < MAXIMO_INTERACOES; i++) {
+							  logger.info("************** Iteracao N. " + i + " ******************");
+							  for (Formiga formiga : formigas) {
+										logger.info("Formiga: " + formiga.getId());
+										// Recupera as alternativas para o trajeto de cada formiga
+										List<Caminho> alternativas = percursoController.getAlternativas(formiga.getLocalizacaoCidadeAtual());
 
-				// Verifica se a formiga ja percorreu todas as cidades.
-				if (percursoController.isFinalizouPercurso(formiga)) {
-					// Adiciona Feromonio ao trajeto percorrido pela formiga
-					this.adicionarFeromonioTrajeto(formiga);
-					this.clearFormiga(formiga);
+										// Recupera o melhor trajeto que a formiga pode escolher
+										Caminho caminhoEscolhido = this.escolherPercurso(formiga, alternativas);
 
-				}
-			}
-		}
+										// atualiza a localização atual da formiga e o estado da cidade.
+										formiga.addCaminho(caminhoEscolhido);
 
-		logger.info("Melhor Trajeto: " + Arrays.toString(percursoController.getMelhorTrajeto().toArray()));
-		logger.info("Menor caminho: " + percursoController.getMenorDistanciaPercorrida());
+										// Verifica se a formiga ja percorreu todas as cidades.
+										if (percursoController.isFinalizouPercurso(formiga)) {
+												  // Adiciona Feromonio ao trajeto percorrido pela formiga
+												  this.adicionarFeromonioTrajeto(formiga);
+												  this.clearFormiga(formiga);
 
-	}
+										}
+							  }
+					}
 
-	private void adicionarFeromonioTrajeto(Formiga formiga) {
-		// Recupera o trajeto efetuado pela formiga
-		List<Caminho> trajetosFormigas = formiga.getTrajetoCidades();
+					logger.info("Melhor Trajeto: " + Arrays.toString(percursoController.getMelhorTrajeto().toArray()));
+					logger.info("Menor caminho: " + percursoController.getMenorDistanciaPercorrida());
 
-		for (Caminho c : trajetosFormigas) {
-			// Recupera a nova quantidade de feromonio atualizado.
-			double novaQntFeromonio = algoritmo.atualizarFeromonio(c.getFeromonio().getQntFeromonio(), formiga.getDistanciaPercorrida());
-			c.getFeromonio().setQntFeromonio(novaQntFeromonio);
-		}
+		  }
 
-		// TODO: Atualiza as estatiscas dos melhores caminhos
-		if (percursoController.getMenorDistanciaPercorrida() == 0 || percursoController.getMenorDistanciaPercorrida() > formiga.getDistanciaPercorrida()) {
-			percursoController.setMenorDistanciaPercorrida(formiga.getDistanciaPercorrida());
-			percursoController.setMelhorTrajeto(formiga.getTrajetoCidades());
-		}
-	}
+		  private void adicionarFeromonioTrajeto(Formiga formiga) {
+					// Recupera o trajeto efetuado pela formiga
+					List<Caminho> trajetosFormigas = formiga.getTrajetoCidades();
 
-	public Caminho escolherPercurso(Formiga formiga, List<Caminho> todasAlternativas) {
-		List<Caminho> caminhosDisponiveis = new ArrayList<Caminho>();
+					for (Caminho c : trajetosFormigas) {
+							  // Recupera a nova quantidade de feromonio atualizado.
+							  double novaQntFeromonio = algoritmo.atualizarFeromonio(c.getFeromonio().getQntFeromonio(), formiga.getDistanciaPercorrida());
+							  c.getFeromonio().setQntFeromonio(novaQntFeromonio);
+					}
 
-		for (Caminho c : todasAlternativas) {
-			if (!formiga.isCidadeVisitada(c.getCidadeDestino())) {
-				caminhosDisponiveis.add(c);
-			}
-		}
+					// TODO: Atualiza as estatiscas dos melhores caminhos
+					if (percursoController.getMenorDistanciaPercorrida() == 0 || percursoController.getMenorDistanciaPercorrida() > formiga.getDistanciaPercorrida()) {
+							  percursoController.setMenorDistanciaPercorrida(formiga.getDistanciaPercorrida());
+							  percursoController.setMelhorTrajeto(formiga.getTrajetoCidades());
+					}
+		  }
 
-		Caminho caminhoEscolhido;
-		/*
-		 * Ira escolher um caminho de uma cidade ainda nao visitada, ou sera escolhida uma cidade ja
-		 * visitada se caso já tiver visitado todas as cidades.
-		 */
-		if (!caminhosDisponiveis.isEmpty()) {
-			caminhoEscolhido = algoritmo.escolherCaminho(caminhosDisponiveis);
-		} else {
-			caminhoEscolhido = algoritmo.escolherCaminho(todasAlternativas);
-		}
+		  public Caminho escolherPercurso(Formiga formiga, List<Caminho> todasAlternativas) {
+					List<Caminho> caminhosDisponiveis = new ArrayList<Caminho>();
 
-		return caminhoEscolhido;
-	}
+					for (Caminho c : todasAlternativas) {
+							  if (!formiga.isCidadeVisitada(c.getCidadeDestino())) {
+										caminhosDisponiveis.add(c);
+							  }
+					}
 
-	private void clearFormiga(Formiga formiga) {
-		logger.debug("Limpando as informações da formiga");
+					Caminho caminhoEscolhido;
+					/*
+					 * Ira escolher um caminho de uma cidade ainda nao visitada, ou sera escolhida uma cidade ja visitada se caso já tiver visitado todas as cidades.
+					 */
+					if (!caminhosDisponiveis.isEmpty()) {
+							  caminhoEscolhido = algoritmo.escolherCaminho(caminhosDisponiveis);
+					} else {
+							  caminhoEscolhido = algoritmo.escolherCaminho(todasAlternativas);
+					}
 
-		Cidade localizacaoAtual = percursoController.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(0, percursoController.getCidadesPercurso().size() - 1));
-		logger.debug("Nova Localizacao Inicial: " + localizacaoAtual.getNome());
+					return caminhoEscolhido;
+		  }
 
-		formiga.clear(localizacaoAtual);
-	}
+		  private void clearFormiga(Formiga formiga) {
+					logger.debug("Limpando as informações da formiga");
+
+					Cidade localizacaoAtual = percursoController.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(0, percursoController.getCidadesPercurso().size() - 1));
+					logger.debug("Nova Localizacao Inicial: " + localizacaoAtual.getNome());
+
+					formiga.clear(localizacaoAtual);
+		  }
 }
