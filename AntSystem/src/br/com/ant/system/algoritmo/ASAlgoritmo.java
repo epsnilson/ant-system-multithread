@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import br.com.ant.system.model.Caminho;
+import br.com.ant.system.util.NumberUtil;
 
 /**
  * Classe responsavel por efetuar os calculos de acordo com o especificado pelo algoritmo AS (Ant
@@ -63,13 +64,13 @@ public class ASAlgoritmo {
 
 		for (Caminho c : caminhosDisponiveis) {
 			double probabilidadeCaminho = this.calcularProbabilidadeCaminho(c);
-			logger.debug("Custo caminho " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + probabilidadeCaminho);
+			logger.debug("Custo caminho " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + NumberUtil.getInstance().doubleToString(probabilidadeCaminho));
 
 			mapProbabilidade.put(c, probabilidadeCaminho);
 			somaProbabilidades += probabilidadeCaminho;
 		}
 
-		logger.debug("Soma de Probabilidades: " + somaProbabilidades);
+		logger.debug("Soma de custos: " + NumberUtil.getInstance().doubleToString(somaProbabilidades));
 
 		return buscarMelhorCaminho(mapProbabilidade, somaProbabilidades);
 
@@ -89,7 +90,7 @@ public class ASAlgoritmo {
 		Caminho melhorCaminho = null;
 		for (Caminho c : mapProbabilidade.keySet()) {
 			double probabilidade = mapProbabilidade.get(c) / somaProbabilidades;
-			logger.debug("Probabilidade " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + probabilidade);
+			logger.debug("Probabilidade " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + NumberUtil.getInstance().doubleToString(probabilidade));
 
 			if (melhorProbabilidade == 0 || probabilidade > melhorProbabilidade) {
 				melhorProbabilidade = probabilidade;
@@ -141,14 +142,14 @@ public class ASAlgoritmo {
 	 */
 	public double atualizarFeromonio(double qntFeromonioAtual, double distanciaPercurso) {
 		logger.debug("Atualizando quantidade de feromonio...");
-		logger.debug("Quanidade de Feromonio atual: " + qntFeromonioAtual);
-		logger.debug("Distancia percorrida pela formiga: " + distanciaPercurso);
+		logger.debug("Quanidade de Feromonio atual: " + NumberUtil.getInstance().doubleToString(qntFeromonioAtual));
+		logger.debug("Distancia percorrida pela formiga: " + NumberUtil.getInstance().doubleToString(distanciaPercurso));
 
 		double quantidadeFeromonioDepositada = quantidadeFeromonioIncrementado / distanciaPercurso;
 
 		double novaQntFeromonio = this.evaporacaoFeromonio(qntFeromonioAtual) + quantidadeFeromonioDepositada;
 
-		logger.debug("Nova quantidade de feromonio gerado: " + novaQntFeromonio);
+		logger.debug("Nova quantidade de feromonio gerado: " + NumberUtil.getInstance().doubleToString(novaQntFeromonio));
 
 		return novaQntFeromonio;
 	}
