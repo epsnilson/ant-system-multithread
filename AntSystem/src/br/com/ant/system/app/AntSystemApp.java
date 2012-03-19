@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.ant.system.algoritmo.ASAlgoritmo;
+import br.com.ant.system.controller.ColoniaFormigaMonothreadController;
 import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Cidade;
@@ -36,33 +37,32 @@ public class AntSystemApp {
 		Cidade co = new Cidade(5, "co");
 		Cidade ba = new Cidade(6, "ba");
 
-		percurso.addPercurso(bh, rj, 9.3F);
-		percurso.addPercurso(bh, co, 10.6F);
+		percurso.addCaminho(bh, rj, 9.3F);
+		percurso.addCaminho(bh, co, 10.6F);
 
-		percurso.addPercurso(rj, sp, 15.3F);
-		percurso.addPercurso(rj, es, 5.3F);
+		percurso.addCaminho(rj, sp, 15.3F);
+		percurso.addCaminho(rj, es, 5.3F);
 
-		percurso.addPercurso(sp, es, 13.4F);
-		percurso.addPercurso(sp, co, 25.3F);
+		percurso.addCaminho(sp, es, 13.4F);
+		percurso.addCaminho(sp, co, 25.3F);
 
-		percurso.addPercurso(es, ba, 30.4F);
+		percurso.addCaminho(es, ba, 30.4F);
 
-		percurso.addPercurso(co, ba, 40.6F);
+		percurso.addCaminho(co, ba, 40.6F);
 
-		List<Formiga> formigas = new ArrayList<Formiga>();
+		ASAlgoritmo algoritmo = new ASAlgoritmo();
 
+		List<FormigaController> formigas = new ArrayList<FormigaController>();
 		for (int i = 0; i < 10; i++) {
 			Cidade atuaCidade = percurso.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(1, 6));
 			Formiga formiga = new Formiga(i, atuaCidade);
 
-			formigas.add(formiga);
+			formigas.add(new FormigaController(formiga, percurso, algoritmo));
 		}
 
-		ASAlgoritmo algoritmo = new ASAlgoritmo();
+		ColoniaFormigaMonothreadController controller = new ColoniaFormigaMonothreadController(formigas, algoritmo, percurso);
 
-		FormigaController controller = new FormigaController(formigas, percurso, algoritmo);
-
-		controller.executarAlgoritmo();
+		controller.run();
 
 	}
 }

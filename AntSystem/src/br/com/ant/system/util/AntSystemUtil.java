@@ -14,6 +14,12 @@
  */
 package br.com.ant.system.util;
 
+/**
+ * Classe utilitaria geral do projeto.
+ * 
+ * @author j.duarte
+ * 
+ */
 public class AntSystemUtil {
 
 	private static AntSystemUtil	instance;
@@ -29,6 +35,15 @@ public class AntSystemUtil {
 	private AntSystemUtil() {
 	}
 
+	/**
+	 * Recupera um numero aleatorio entre o range informado (min/max).
+	 * 
+	 * @param min
+	 *            Valor minimo que pode ser retornado
+	 * @param max
+	 *            Valor maximo que poderá ser retornado.
+	 * @return
+	 */
 	public int getAleatorio(int min, int max) {
 		int aleatorio = min + (int) ((max - min) * Math.random());
 		return aleatorio;
