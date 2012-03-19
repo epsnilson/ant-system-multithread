@@ -16,7 +16,6 @@ package br.com.ant.system.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,9 +28,6 @@ public class PercursoController {
 		  private List<Cidade>			   cidadesPercurso	 = new ArrayList<Cidade>();
 		  private List<Caminho>			  caminhosDisponiveis = new ArrayList<Caminho>();
 		  private Map<Cidade, List<Caminho>> mapPercurso		 = new HashMap<Cidade, List<Caminho>>();
-
-		  private List<Caminho>			  melhorTrajeto	   = new LinkedList<Caminho>();
-		  private double					 menorDistanciaPercorrida;
 
 		  public void addPercurso(Cidade cidadeOrigem, Cidade cidadeDestino, float distancia) {
 					Caminho caminho = new Caminho(cidadeOrigem, cidadeDestino, distancia);
@@ -85,26 +81,6 @@ public class PercursoController {
 					}
 
 					return terminado;
-		  }
-
-		  public List<Caminho> getMelhorTrajeto() {
-					return melhorTrajeto;
-		  }
-
-		  public double getMenorDistanciaPercorrida() {
-					return menorDistanciaPercorrida;
-		  }
-
-		  public void setMelhorTrajeto(List<Caminho> melhorTrajeto) {
-					this.melhorTrajeto.clear();
-					for (int i = 0; i < melhorTrajeto.size(); i++) {
-							  Caminho c = melhorTrajeto.get(i);
-							  this.melhorTrajeto.add(c);
-					}
-		  }
-
-		  public void setMenorDistanciaPercorrida(double menorDistanciaPercorrida) {
-					this.menorDistanciaPercorrida = menorDistanciaPercorrida;
 		  }
 
 		  public List<Caminho> getCaminhosDisponiveis() {
