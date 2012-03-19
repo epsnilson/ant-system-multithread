@@ -72,7 +72,11 @@ public class ASAlgoritmo {
 
 		logger.debug("Soma de custos: " + NumberUtil.getInstance().doubleToString(somaProbabilidades));
 
-		return buscarMelhorCaminho(mapProbabilidade, somaProbabilidades);
+		Caminho escolhido = this.buscarMelhorCaminho(mapProbabilidade, somaProbabilidades);
+
+		mapProbabilidade = null;
+
+		return escolhido;
 
 	}
 
