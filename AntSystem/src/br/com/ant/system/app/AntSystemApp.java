@@ -51,6 +51,7 @@ public class AntSystemApp {
 		percurso.addCaminho(co, ba, 40.6F);
 
 		ASAlgoritmo algoritmo = new ASAlgoritmo();
+		algoritmo.setPesoVisibilidade(3);
 
 		List<FormigaController> formigas = new ArrayList<FormigaController>();
 		for (int i = 0; i < 10; i++) {

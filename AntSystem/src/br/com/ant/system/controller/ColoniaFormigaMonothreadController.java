@@ -28,7 +28,7 @@ import br.com.ant.system.algoritmo.ASAlgoritmo;
  */
 public class ColoniaFormigaMonothreadController {
 
-	private static final int		MAXIMO_INTERACOES	= 50;
+	private static final int		MAXIMO_INTERACOES	= 10000;
 	private List<FormigaController>	formigas;
 	private Logger					logger				= Logger.getLogger(this.getClass());
 	private PercursoController		percursoController;

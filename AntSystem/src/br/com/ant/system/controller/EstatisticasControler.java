@@ -110,7 +110,7 @@ public class EstatisticasControler {
 							  buffer.append(e.getTempoGasto());
 							  buffer.append("ms");
 							  buffer.append("\n");
-							  buffer.append("Distancia Percorrida");
+							  buffer.append("Distancia Percorrida: ");
 							  buffer.append(NumberUtil.getInstance().doubleToString(e.getDistanciaPercorrida()));
 							  buffer.append("\n");
 							  buffer.append("Trajeto: ");

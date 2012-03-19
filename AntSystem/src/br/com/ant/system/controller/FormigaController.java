@@ -57,6 +57,12 @@ public class FormigaController {
 		// Recupera as alternativas para o trajeto de cada formiga
 		List<Caminho> todasAlternativas = percursoController.getAlternativas(formiga.getLocalizacaoCidadeAtual());
 
+		if (todasAlternativas.size() != 1) {
+			// TODO: Verificar este procedimento.
+			Caminho caminhoInverso = formiga.getUltimoCaminho();
+			todasAlternativas.remove(caminhoInverso);
+		}
+
 		// Verifica quais caminhos nao foram visitados.
 		List<Caminho> caminhosDisponiveis = new ArrayList<Caminho>();
 		for (Caminho c : todasAlternativas) {
