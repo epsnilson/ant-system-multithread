@@ -23,68 +23,98 @@ import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
 
+/**
+ * Classe responsavel a controlar o ambiente do percurso
+ * 
+ * @author j.duarte
+ * 
+ */
 public class PercursoController {
 
-		  private List<Cidade>			   cidadesPercurso	 = new ArrayList<Cidade>();
-		  private List<Caminho>			  caminhosDisponiveis = new ArrayList<Caminho>();
-		  private Map<Cidade, List<Caminho>> mapPercurso		 = new HashMap<Cidade, List<Caminho>>();
+	private List<Cidade>				cidadesPercurso		= new ArrayList<Cidade>();
+	private List<Caminho>				caminhosDisponiveis	= new ArrayList<Caminho>();
+	private Map<Cidade, List<Caminho>>	mapPercurso			= new HashMap<Cidade, List<Caminho>>();
 
-		  public void addPercurso(Cidade cidadeOrigem, Cidade cidadeDestino, float distancia) {
-					Caminho caminho = new Caminho(cidadeOrigem, cidadeDestino, distancia);
-					Caminho caminhoInverso = new Caminho(cidadeDestino, cidadeOrigem, distancia);
+	/**
+	 * Adiciona um novo caminho ao percurso.
+	 * 
+	 * @param cidadeOrigem
+	 *            Cidade de origem do caminho.
+	 * @param cidadeDestino
+	 *            Cidade de destino da formiga.
+	 * @param distancia
+	 *            Distancia (custo) do percurso entre as cidades (origem e destino).
+	 */
+	public void addCaminho(Cidade cidadeOrigem, Cidade cidadeDestino, float distancia) {
+		Caminho caminho = new Caminho(cidadeOrigem, cidadeDestino, distancia);
+		Caminho caminhoInverso = new Caminho(cidadeDestino, cidadeOrigem, distancia);
 
-					this.caminhosDisponiveis.add(caminho);
-					this.caminhosDisponiveis.add(caminhoInverso);
+		this.caminhosDisponiveis.add(caminho);
 
-					if (!cidadesPercurso.contains(cidadeOrigem)) {
-							  cidadesPercurso.add(cidadeOrigem);
-					}
+		// Adiciona o caminho inverso. (Matriz identidade)
+		this.caminhosDisponiveis.add(caminhoInverso);
 
-					if (!cidadesPercurso.contains(cidadeDestino)) {
-							  cidadesPercurso.add(cidadeDestino);
-					}
+		if (!cidadesPercurso.contains(cidadeOrigem)) {
+			cidadesPercurso.add(cidadeOrigem);
+		}
 
-					this.addtoMapPercurso(cidadeOrigem, caminho);
-					this.addtoMapPercurso(cidadeDestino, caminhoInverso);
-		  }
+		if (!cidadesPercurso.contains(cidadeDestino)) {
+			cidadesPercurso.add(cidadeDestino);
+		}
 
-		  private void addtoMapPercurso(Cidade cidadeOrigem, Caminho caminho) {
-					List<Caminho> caminhos;
-					if (mapPercurso.containsKey(cidadeOrigem)) {
-							  caminhos = mapPercurso.get(cidadeOrigem);
-							  caminhos.add(caminho);
-					} else {
-							  caminhos = new ArrayList<Caminho>();
-							  caminhos.add(caminho);
-							  mapPercurso.put(cidadeOrigem, caminhos);
-					}
-		  }
+		this.addtoMapPercurso(cidadeOrigem, caminho);
+		this.addtoMapPercurso(cidadeDestino, caminhoInverso);
+	}
 
-		  public List<Cidade> getCidadesPercurso() {
-					return cidadesPercurso;
-		  }
+	/**
+	 * Adiciona o caminho ao mapa de caminhos.
+	 * 
+	 * @param cidadeOrigem
+	 * @param caminho
+	 */
+	private void addtoMapPercurso(Cidade cidadeOrigem, Caminho caminho) {
+		List<Caminho> caminhos;
+		if (mapPercurso.containsKey(cidadeOrigem)) {
+			caminhos = mapPercurso.get(cidadeOrigem);
+			caminhos.add(caminho);
+		} else {
+			caminhos = new ArrayList<Caminho>();
+			caminhos.add(caminho);
+			mapPercurso.put(cidadeOrigem, caminhos);
+		}
+	}
 
-		  public Map<Cidade, List<Caminho>> getMapPercurso() {
-					return mapPercurso;
-		  }
+	public List<Cidade> getCidadesPercurso() {
+		return cidadesPercurso;
+	}
 
-		  public List<Caminho> getAlternativas(Cidade cidade) {
-					return mapPercurso.get(cidade);
-		  }
+	public Map<Cidade, List<Caminho>> getMapPercurso() {
+		return mapPercurso;
+	}
 
-		  public boolean isFinalizouPercurso(Formiga formiga) {
-					boolean terminado = false;
-					if (cidadesPercurso.size() == formiga.getCidadesVisitadas().size()) {
-							  if (formiga.getLocalizacaoCidadeAtual().equals(formiga.getLocalizacaoCidadeInicial())) {
-										terminado = true;
-							  }
-					}
+	public List<Caminho> getAlternativas(Cidade cidade) {
+		return mapPercurso.get(cidade);
+	}
 
-					return terminado;
-		  }
+	/**
+	 * Verifica se a formiga percorreu todas as formigas e retornou ao destino.
+	 * 
+	 * @param formiga
+	 * @return
+	 */
+	public boolean isFinalizouPercurso(Formiga formiga) {
+		boolean terminado = false;
+		if (cidadesPercurso.size() == formiga.getCidadesVisitadas().size()) {
+			if (formiga.getLocalizacaoCidadeAtual().equals(formiga.getLocalizacaoCidadeInicial())) {
+				terminado = true;
+			}
+		}
 
-		  public List<Caminho> getCaminhosDisponiveis() {
-					return caminhosDisponiveis;
-		  }
+		return terminado;
+	}
+
+	public List<Caminho> getCaminhosDisponiveis() {
+		return caminhosDisponiveis;
+	}
 
 }
