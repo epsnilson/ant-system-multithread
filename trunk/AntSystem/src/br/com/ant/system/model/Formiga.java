@@ -29,6 +29,9 @@ public class Formiga implements Cloneable {
 		  private List<Caminho> trajetoCidades   = new LinkedList<Caminho>();
 		  private double		distanciaPercorrida;
 
+		  private long		  tempoInicial;
+		  private long		  tempoFinal;
+
 		  public Formiga(int number, Cidade localizacaoAtual) {
 					if (localizacaoAtual == null) {
 							  throw new RuntimeException("Localizacao atual nao pode ser nula");
@@ -68,6 +71,8 @@ public class Formiga implements Cloneable {
 					this.trajetoCidades.clear();
 					this.cidadesVisitadas.clear();
 					this.distanciaPercorrida = 0.0;
+					this.tempoInicial = 0;
+					this.tempoFinal = 0;
 
 					this.localizacaoCidadeAtual = localizacaoAtual;
 					this.localizacaoCidadeInicial = localizacaoAtual;
@@ -102,5 +107,21 @@ public class Formiga implements Cloneable {
 
 		  public double getDistanciaPercorrida() {
 					return distanciaPercorrida;
+		  }
+
+		  public long getTempoFinal() {
+					return tempoFinal;
+		  }
+
+		  public void setTempoFinal(long tempoFinal) {
+					this.tempoFinal = tempoFinal;
+		  }
+
+		  public long getTempoInicial() {
+					return tempoInicial;
+		  }
+
+		  public void setTempoInicial(long tempoInicial) {
+					this.tempoInicial = tempoInicial;
 		  }
 }
