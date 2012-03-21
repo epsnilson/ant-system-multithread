@@ -54,7 +54,7 @@ public class AntSystemApp {
 		algoritmo.setPesoVisibilidade(3);
 
 		List<FormigaController> formigas = new ArrayList<FormigaController>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < percurso.getCidadesPercurso().size(); i++) {
 			Cidade atuaCidade = percurso.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(1, 6));
 			Formiga formiga = new Formiga(i, atuaCidade);
 

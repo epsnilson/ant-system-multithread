@@ -15,6 +15,7 @@
 package br.com.ant.system.controller;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -57,15 +58,17 @@ public class FormigaController {
 		// Recupera as alternativas para o trajeto de cada formiga
 		List<Caminho> todasAlternativas = percursoController.getAlternativas(formiga.getLocalizacaoCidadeAtual());
 
-		if (todasAlternativas.size() != 1) {
-			// TODO: Verificar este procedimento.
-			Caminho caminhoInverso = formiga.getUltimoCaminho();
-			todasAlternativas.remove(caminhoInverso);
-		}
+		Caminho caminhoInverso = formiga.getUltimoCaminho();
 
 		// Verifica quais caminhos nao foram visitados.
 		List<Caminho> caminhosDisponiveis = new ArrayList<Caminho>();
-		for (Caminho c : todasAlternativas) {
+		for (Iterator<Caminho> it = todasAlternativas.iterator(); it.hasNext();) {
+			Caminho c = (Caminho) it.next();
+			if (caminhoInverso != null && c.getCidadeDestino().equals(caminhoInverso.getCidadeOrigem()) && it.hasNext()) {
+				it.remove();
+				continue;
+			}
+
 			if (!formiga.isCidadeVisitada(c.getCidadeDestino())) {
 				caminhosDisponiveis.add(c);
 			}
