@@ -28,7 +28,7 @@ import br.com.ant.system.algoritmo.ASAlgoritmo;
  */
 public class ColoniaFormigaMonothreadController {
 
-	private static final int		MAXIMO_INTERACOES	= 1000;
+	private static final int		MAXIMO_INTERACOES	= 1;
 	private List<FormigaController>	formigas;
 	private Logger					logger				= Logger.getLogger(this.getClass());
 	private PercursoController		percursoController;
@@ -48,37 +48,45 @@ public class ColoniaFormigaMonothreadController {
 		logger.info("Quantidade de formigas: " + formigas.size());
 		logger.info("Quantidade de cidades: " + percursoController.getCidadesPercurso());
 
+		EstatisticasControler.getInstance().setHorarioInicial(System.currentTimeMillis());
+		logger.info("Horario Inicial: " + EstatisticasControler.getInstance().getHorarioInicial());
+
 		for (int i = 0; i < MAXIMO_INTERACOES; i++) {
 			logger.info("************** Iteracao N. " + i + " ******************");
 			for (FormigaController controller : formigas) {
 				logger.info("Formiga: " + controller.getFormiga().getId());
 
 				// Setando o tempo inicial
-				if (controller.getFormiga().getTempoInicial() == 0) {
-					controller.getFormiga().setTempoInicial(System.currentTimeMillis());
-				}
+				controller.getFormiga().setTempoInicial(System.currentTimeMillis());
 
-				// Recupera o melhor trajeto que a formiga pode escolher
-				controller.escolherPercurso();
+				/*
+				 * Fica em loop ate a formiga finalizar o caminho completo..
+				 */
+				do {
+					// Recupera o melhor trajeto que a formiga pode escolher
+					controller.escolherPercurso();
+				} while (!percursoController.isFinalizouPercurso(controller.getFormiga()));
 
-				// Verifica se a formiga ja percorreu todas as cidades.
-				if (percursoController.isFinalizouPercurso(controller.getFormiga())) {
-					// Setando o tempo final do percurso
-					controller.getFormiga().setTempoFinal(System.currentTimeMillis());
+				// Setando o tempo final do percurso
+				controller.getFormiga().setTempoFinal(System.currentTimeMillis());
 
-					// Adiciona Feromonio ao trajeto percorrido pela formiga
-					feromonioController.adicionarFeromonioTrajeto(controller.getFormiga());
+				// Adiciona Feromonio ao trajeto percorrido pela formiga
+				feromonioController.adicionarFeromonioTrajeto(controller.getFormiga());
 
-					EstatisticasControler.getInstance().coletarEstatisticas(controller.getFormiga());
-					// Limpando os dados da formiga
-					controller.clearFormiga();
+				// Coletando dados estatisticos do trajeto da formiga.
+				EstatisticasControler.getInstance().coletarEstatisticas(controller.getFormiga());
 
-				}
+				// Limpando os dados da formiga
+				controller.clearFormiga();
 			}
 		}
 
-		logger.info(EstatisticasControler.getInstance().printEstatisticas());
+		EstatisticasControler.getInstance().setHorarioFinal(System.currentTimeMillis());
+		logger.info("Horario Final: " + EstatisticasControler.getInstance().getHorarioFinal());
+		logger.info("Tempo de execucao: " + EstatisticasControler.getInstance().getTempoExecucao());
+
+		// Exibindo dados da estatisticos.
+		EstatisticasControler.getInstance().loggerEstatisticas();
 
 	}
-
 }

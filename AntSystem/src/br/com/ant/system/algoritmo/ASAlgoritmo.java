@@ -15,12 +15,14 @@
 package br.com.ant.system.algoritmo;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import br.com.ant.system.model.Caminho;
+import br.com.ant.system.model.Formiga;
 import br.com.ant.system.util.NumberUtil;
 
 /**
@@ -55,26 +57,89 @@ public class ASAlgoritmo {
 	 * Escolhe o Melhor caminho apartir dos caminhos disponiveis e do algoritmo proposto pelo
 	 * algoritmo padrão do AS(Ant System)
 	 * 
-	 * @param caminhosDisponiveis
+	 * @param todasAlternativas
+	 * @param formiga
 	 * @return
 	 */
-	public Caminho escolherCaminho(List<Caminho> caminhosDisponiveis) {
-		Map<Caminho, Double> mapProbabilidade = new HashMap<Caminho, Double>();
-		double somaProbabilidades = 0;
+	public Caminho escolherCaminho(Formiga formiga, List<Caminho> todasAlternativas) {
+		Map<Caminho, Double> mapProbabilidadesDisponiveis = new HashMap<Caminho, Double>();
+		double somaProbabilidadesDisponiveis = 0;
 
-		for (Caminho c : caminhosDisponiveis) {
-			double probabilidadeCaminho = this.calcularProbabilidadeCaminho(c);
-			logger.debug("Custo caminho " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + NumberUtil.getInstance().doubleToString(probabilidadeCaminho));
+		/*
+		 * Verifica quais caminhos nao foram visitados.
+		 */
+		for (Iterator<Caminho> it = todasAlternativas.iterator(); it.hasNext();) {
+			Caminho c = (Caminho) it.next();
+			if (!formiga.getCidadesVisitadas().contains(c.getCidadeDestino())) {
+				double probabilidadeCaminho = this.calcularProbabilidadeCaminho(c);
 
-			mapProbabilidade.put(c, probabilidadeCaminho);
-			somaProbabilidades += probabilidadeCaminho;
+				mapProbabilidadesDisponiveis.put(c, probabilidadeCaminho);
+				somaProbabilidadesDisponiveis += probabilidadeCaminho;
+			}
+
 		}
 
-		logger.debug("Soma de custos: " + NumberUtil.getInstance().doubleToString(somaProbabilidades));
+		Caminho escolhido = null;
 
-		Caminho escolhido = this.buscarMelhorCaminho(mapProbabilidade, somaProbabilidades);
+		/*
+		 * se caso nao houver cidades nao visitadas, ira tentar uma soluaca customizada.
+		 */
+		if (mapProbabilidadesDisponiveis.size() == 0) {
+			logger.info("Todas as cidades ja foram visitadas. Utilizando solução customizada.");
+			Caminho caminhoInverso = formiga.getUltimoCaminho();
+			for (Iterator<Caminho> it = todasAlternativas.iterator(); it.hasNext();) {
+				Caminho c = (Caminho) it.next();
 
-		mapProbabilidade = null;
+				/*
+				 * A formiga irá escoher o caminho caso a cidade destino do caminho for igual a
+				 * cidade inicial da formiga e todas as cidades já forem visitadas.
+				 */
+				if (c.getCidadeDestino().equals(formiga.getLocalizacaoCidadeInicial()) && formiga.isTodasVisitadas()) {
+					logger.info("Cidade destino == Cidade Inicial da formiga.");
+					escolhido = c;
+					break;
+				}
+
+				/*
+				 * Ira remover o caminho inverso do trajeto.
+				 */
+				if (caminhoInverso != null && c.getCidadeDestino().equals(caminhoInverso.getCidadeOrigem()) && it.hasNext()) {
+					logger.info("Removendo o caminho inverso do trajeto.");
+					it.remove();
+					continue;
+				}
+
+				/*
+				 * Ira remover o penultimo caminho, caso o algoritmo tente entrar em estagnação
+				 * entre as cidades.
+				 */
+				Caminho penultimoCaminho = formiga.getPenultimoCaminho();
+				if (penultimoCaminho != null && todasAlternativas.size() > 1 && c.getCidadeDestino().equals(penultimoCaminho.getCidadeOrigem())) {
+					logger.info("Penultimo caminho irá levar a uma possivel estagnacao. Sera removida do mapa.");
+					it.remove();
+					continue;
+				}
+
+				/*
+				 * se caso as alternativas acima falhar ira calcular a probabilidade apartir das
+				 * cidades restantes.
+				 */
+				double probabilidadeCaminho = this.calcularProbabilidadeCaminho(c);
+				mapProbabilidadesDisponiveis.put(c, probabilidadeCaminho);
+
+				somaProbabilidadesDisponiveis += probabilidadeCaminho;
+			}
+		}
+
+		/*
+		 * Se o caminho ainda tiver sido escolhido, irá seguir o algoritmo do AntSystem.
+		 */
+		if (escolhido == null) {
+			logger.debug("Soma de custos: " + NumberUtil.getInstance().doubleToString(somaProbabilidadesDisponiveis));
+			escolhido = this.buscarMelhorCaminho(mapProbabilidadesDisponiveis, somaProbabilidadesDisponiveis);
+		}
+
+		mapProbabilidadesDisponiveis = null;
 
 		return escolhido;
 
@@ -117,6 +182,7 @@ public class ASAlgoritmo {
 	private double calcularProbabilidadeCaminho(Caminho c) {
 		double visibilidadeCidade = 1 / c.getDistancia();
 		double probabilidadeCaminho = (Math.pow(c.getFeromonio().getQntFeromonio(), pesoFeromonio) * Math.pow(visibilidadeCidade, pesoVisibilidade));
+		logger.debug("Custo caminho " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + NumberUtil.getInstance().doubleToString(probabilidadeCaminho));
 
 		return probabilidadeCaminho;
 	}

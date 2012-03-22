@@ -14,8 +14,6 @@
  */
 package br.com.ant.system.controller;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -58,32 +56,11 @@ public class FormigaController {
 		// Recupera as alternativas para o trajeto de cada formiga
 		List<Caminho> todasAlternativas = percursoController.getAlternativas(formiga.getLocalizacaoCidadeAtual());
 
-		Caminho caminhoInverso = formiga.getUltimoCaminho();
+		// Verifica se todas as cidades ja foram visitadas.
+		formiga.setTodasVisitadas(percursoController.isTodasCidadesPercorrida(formiga));
 
-		// Verifica quais caminhos nao foram visitados.
-		List<Caminho> caminhosDisponiveis = new ArrayList<Caminho>();
-		for (Iterator<Caminho> it = todasAlternativas.iterator(); it.hasNext();) {
-			Caminho c = (Caminho) it.next();
-			if (caminhoInverso != null && c.getCidadeDestino().equals(caminhoInverso.getCidadeOrigem()) && it.hasNext()) {
-				it.remove();
-				continue;
-			}
-
-			if (!formiga.isCidadeVisitada(c.getCidadeDestino())) {
-				caminhosDisponiveis.add(c);
-			}
-		}
-
-		Caminho caminhoEscolhido;
-		/*
-		 * Ira escolher um caminho de uma cidade ainda nao visitada, ou sera escolhida uma cidade ja
-		 * visitada se caso já tiver visitado todas as cidades.
-		 */
-		if (!caminhosDisponiveis.isEmpty()) {
-			caminhoEscolhido = algoritmo.escolherCaminho(caminhosDisponiveis);
-		} else {
-			caminhoEscolhido = algoritmo.escolherCaminho(todasAlternativas);
-		}
+		// Escolhendo o caminho destino
+		Caminho caminhoEscolhido = algoritmo.escolherCaminho(formiga, todasAlternativas);
 
 		// atualiza a localização atual da formiga e o estado da cidade.
 		formiga.addCaminho(caminhoEscolhido);
