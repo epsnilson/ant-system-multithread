@@ -79,7 +79,6 @@ public class ImportarArquivoCidades {
 					String cidadeDestino = matrizCidades[0][j];
 					String distancia = matrizCidades[i][j];
 
-					System.out.println("Iteracao " + i + " cida " + cidadeOrigem);
 					if (cidadesIncluidas.contains(cidadeDestino)) {
 						continue;
 					}
