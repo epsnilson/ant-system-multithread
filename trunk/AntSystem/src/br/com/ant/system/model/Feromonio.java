@@ -14,6 +14,11 @@
  */
 package br.com.ant.system.model;
 
+/**
+ * 
+ * @author j.duarte
+ * 
+ */
 public class Feromonio {
 	private double	qntFeromonio;
 
