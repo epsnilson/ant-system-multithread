@@ -45,25 +45,24 @@ public class PercursoController {
 	 * @param distancia
 	 *            Distancia (custo) do percurso entre as cidades (origem e destino).
 	 */
-	public void addCaminho(Cidade cidadeOrigem, Cidade cidadeDestino, float distancia) {
-		Caminho caminho = new Caminho(cidadeOrigem, cidadeDestino, distancia);
-		Caminho caminhoInverso = new Caminho(cidadeDestino, cidadeOrigem, distancia);
+	public void addCaminho(Caminho caminho) {
+		Caminho caminhoInverso = new Caminho(caminho.getCidadeDestino(), caminho.getCidadeOrigem(), caminho.getDistancia());
 
 		this.caminhosDisponiveis.add(caminho);
 
 		// Adiciona o caminho inverso. (Matriz identidade)
 		this.caminhosDisponiveis.add(caminhoInverso);
 
-		if (!cidadesPercurso.contains(cidadeOrigem)) {
-			cidadesPercurso.add(cidadeOrigem);
+		if (!cidadesPercurso.contains(caminho.getCidadeOrigem())) {
+			cidadesPercurso.add(caminho.getCidadeOrigem());
 		}
 
-		if (!cidadesPercurso.contains(cidadeDestino)) {
-			cidadesPercurso.add(cidadeDestino);
+		if (!cidadesPercurso.contains(caminho.getCidadeDestino())) {
+			cidadesPercurso.add(caminho.getCidadeDestino());
 		}
 
-		this.addtoMapPercurso(cidadeOrigem, caminho);
-		this.addtoMapPercurso(cidadeDestino, caminhoInverso);
+		this.addtoMapPercurso(caminho.getCidadeOrigem(), caminho);
+		this.addtoMapPercurso(caminho.getCidadeDestino(), caminhoInverso);
 	}
 
 	/**
@@ -104,13 +103,26 @@ public class PercursoController {
 	 */
 	public boolean isFinalizouPercurso(Formiga formiga) {
 		boolean terminado = false;
-		if (cidadesPercurso.size() == formiga.getCidadesVisitadas().size()) {
-			if (formiga.getLocalizacaoCidadeAtual().equals(formiga.getLocalizacaoCidadeInicial())) {
-				terminado = true;
-			}
+		if (isTodasCidadesPercorrida(formiga) && formiga.getLocalizacaoCidadeAtual().equals(formiga.getLocalizacaoCidadeInicial())) {
+			terminado = true;
 		}
 
 		return terminado;
+	}
+
+	/**
+	 * Verifica se todas as cidades já forma visitadas.
+	 * 
+	 * @param formiga
+	 * @return
+	 */
+	public boolean isTodasCidadesPercorrida(Formiga formiga) {
+		boolean visitados = false;
+		if (cidadesPercurso.size() == formiga.getCidadesVisitadas().size()) {
+			visitados = true;
+		}
+
+		return visitados;
 	}
 
 	public List<Caminho> getCaminhosDisponiveis() {

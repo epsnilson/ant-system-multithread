@@ -18,9 +18,9 @@ public class Caminho {
 	private Cidade		cidadeOrigem;
 	private Cidade		cidadeDestino;
 	private Feromonio	feromonio;
-	private float		distancia;
+	private double		distancia;
 
-	public Caminho(Cidade cidadeOrigem, Cidade cidadeDestino, float distancia) {
+	public Caminho(Cidade cidadeOrigem, Cidade cidadeDestino, double distancia) {
 		this.cidadeOrigem = cidadeOrigem;
 		this.cidadeDestino = cidadeDestino;
 
@@ -28,11 +28,11 @@ public class Caminho {
 		this.feromonio = new Feromonio();
 	}
 
-	public void setDistancia(float distancia) {
+	public void setDistancia(double distancia) {
 		this.distancia = distancia;
 	}
 
-	public float getDistancia() {
+	public double getDistancia() {
 		return distancia;
 	}
 
@@ -70,5 +70,20 @@ public class Caminho {
 		buffer.append("]");
 
 		return buffer.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		Caminho c = (Caminho) obj;
+		if (c.getCidadeDestino().getNome().equals(cidadeDestino.getNome()) && c.getCidadeOrigem().getNome().equals(cidadeOrigem.getNome())) {
+			return true;
+		}
+
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return getCidadeDestino().getNome().hashCode() ^ getCidadeOrigem().getNome().hashCode();
 	}
 }

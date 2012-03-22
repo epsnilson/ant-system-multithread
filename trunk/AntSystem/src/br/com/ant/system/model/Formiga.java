@@ -26,12 +26,16 @@ public class Formiga implements Cloneable {
 	private Cidade			localizacaoCidadeAtual;
 	private Cidade			localizacaoCidadeInicial;
 	private Caminho			ultimoCaminho;
+	private Caminho			penultimoCaminho;
+
 	private Set<Cidade>		cidadesVisitadas	= new HashSet<Cidade>();
 	private List<Caminho>	trajetoCidades		= new LinkedList<Caminho>();
 	private double			distanciaPercorrida;
 
 	private long			tempoInicial;
 	private long			tempoFinal;
+
+	boolean					todasVisitadas;
 
 	public Formiga(int number, Cidade localizacaoAtual) {
 		if (localizacaoAtual == null) {
@@ -57,7 +61,9 @@ public class Formiga implements Cloneable {
 	}
 
 	public void addCaminho(Caminho caminho) {
+		this.penultimoCaminho = this.ultimoCaminho;
 		this.ultimoCaminho = caminho;
+
 		this.cidadesVisitadas.add(caminho.getCidadeDestino());
 		this.trajetoCidades.add(caminho);
 		this.distanciaPercorrida += caminho.getDistancia();
@@ -129,5 +135,17 @@ public class Formiga implements Cloneable {
 
 	public Caminho getUltimoCaminho() {
 		return ultimoCaminho;
+	}
+
+	public Caminho getPenultimoCaminho() {
+		return penultimoCaminho;
+	}
+
+	public void setTodasVisitadas(boolean todasVisitadas) {
+		this.todasVisitadas = todasVisitadas;
+	}
+
+	public boolean isTodasVisitadas() {
+		return todasVisitadas;
 	}
 }

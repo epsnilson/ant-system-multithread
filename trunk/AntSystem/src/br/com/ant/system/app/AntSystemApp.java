@@ -15,46 +15,37 @@
 package br.com.ant.system.app;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.ColoniaFormigaMonothreadController;
 import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
+import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
 import br.com.ant.system.util.AntSystemUtil;
+import br.com.ant.system.util.ImportarArquivoCidades;
 
 public class AntSystemApp {
 
 	public static void main(String[] args) {
 		PercursoController percurso = new PercursoController();
 
-		Cidade bh = new Cidade(1, "bh");
-		Cidade rj = new Cidade(2, "rj");
-		Cidade sp = new Cidade(3, "sp");
-		Cidade es = new Cidade(4, "es");
-		Cidade co = new Cidade(5, "co");
-		Cidade ba = new Cidade(6, "ba");
+		ImportarArquivoCidades imp = new ImportarArquivoCidades();
+		Set<Caminho> caminhos = imp.importarAquivo("c:/distancias.csv");
 
-		percurso.addCaminho(bh, rj, 9.3F);
-		percurso.addCaminho(bh, co, 10.6F);
-
-		percurso.addCaminho(rj, sp, 15.3F);
-		percurso.addCaminho(rj, es, 5.3F);
-
-		percurso.addCaminho(sp, es, 13.4F);
-		percurso.addCaminho(sp, co, 25.3F);
-
-		percurso.addCaminho(es, ba, 30.4F);
-
-		percurso.addCaminho(co, ba, 40.6F);
+		for (Iterator<Caminho> it = caminhos.iterator(); it.hasNext();) {
+			Caminho c = (Caminho) it.next();
+			percurso.addCaminho(c);
+		}
 
 		ASAlgoritmo algoritmo = new ASAlgoritmo();
-		algoritmo.setPesoVisibilidade(3);
 
 		List<FormigaController> formigas = new ArrayList<FormigaController>();
-		for (int i = 0; i < percurso.getCidadesPercurso().size(); i++) {
+		for (int i = 0; i < 1; i++) {
 			Cidade atuaCidade = percurso.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(1, 6));
 			Formiga formiga = new Formiga(i, atuaCidade);
 

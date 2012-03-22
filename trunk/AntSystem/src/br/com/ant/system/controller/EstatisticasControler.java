@@ -19,107 +19,119 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Estatistica;
 import br.com.ant.system.model.Formiga;
 import br.com.ant.system.util.NumberUtil;
 
+/**
+ * Classe responsavel pela coletas de estaticas da execucao do algoritmo.
+ * 
+ * @author j.duarte
+ * 
+ */
 public class EstatisticasControler {
 
-		  private List<Caminho>				melhorCaminho = new LinkedList<Caminho>();
-		  private double					   menorCaminhoPercorrido;
-		  private Long						 menorTempo;
+	private List<Caminho>					melhorCaminho	= new LinkedList<Caminho>();
+	private double							menorCaminhoPercorrido;
+	private Long							menorTempo;
+	private long							horarioInicial;
+	private long							horarioFinal;
 
-		  private List<Estatistica>			estatisticas  = new ArrayList<Estatistica>();
+	Logger									logger			= Logger.getLogger(this.getClass());
+	private List<Estatistica>				estatisticas	= new ArrayList<Estatistica>();
 
-		  private static EstatisticasControler instance;
+	private static EstatisticasControler	instance;
 
-		  public static EstatisticasControler getInstance() {
-					if (instance == null) {
-							  instance = new EstatisticasControler();
-					}
+	public static EstatisticasControler getInstance() {
+		if (instance == null) {
+			instance = new EstatisticasControler();
+		}
 
-					return instance;
-		  }
+		return instance;
+	}
 
-		  private EstatisticasControler() {
-		  }
+	private EstatisticasControler() {
+	}
 
-		  public void coletarEstatisticas(Formiga formiga) {
-					this.addEstatistica(formiga);
+	public void coletarEstatisticas(Formiga formiga) {
+		this.addEstatistica(formiga);
 
-					if (menorCaminhoPercorrido == 0 || formiga.getDistanciaPercorrida() < menorCaminhoPercorrido) {
-							  menorCaminhoPercorrido = formiga.getDistanciaPercorrida();
+		if (menorCaminhoPercorrido == 0 || formiga.getDistanciaPercorrida() < menorCaminhoPercorrido) {
+			menorCaminhoPercorrido = formiga.getDistanciaPercorrida();
 
-							  // Copiando a o caminho percorrido para o melhor caminho.
-							  melhorCaminho.addAll(formiga.getTrajetoCidades());
+			// Copiando a o caminho percorrido para o melhor caminho.
+			melhorCaminho.addAll(formiga.getTrajetoCidades());
 
-							  // Setando o menor tempo.
-							  menorTempo = (formiga.getTempoFinal() - formiga.getTempoInicial());
-					}
-		  }
+			// Setando o menor tempo.
+			menorTempo = (formiga.getTempoFinal() - formiga.getTempoInicial());
+		}
+	}
 
-		  private void addEstatistica(Formiga formiga) {
-					Estatistica estatistica = new Estatistica();
-					estatistica.setFormigaId(formiga.getId());
-					estatistica.setDistanciaPercorrida(formiga.getDistanciaPercorrida());
-					estatistica.setTempoGasto(formiga.getTempoFinal() - formiga.getTempoInicial());
+	private void addEstatistica(Formiga formiga) {
+		Estatistica estatistica = new Estatistica();
+		estatistica.setFormigaId(formiga.getId());
+		estatistica.setDistanciaPercorrida(formiga.getDistanciaPercorrida());
+		estatistica.setTempoGasto(formiga.getTempoFinal() - formiga.getTempoInicial());
 
-					estatistica.getCaminhoPercorrido().addAll(formiga.getTrajetoCidades());
-					estatisticas.add(estatistica);
-		  }
+		estatistica.getCaminhoPercorrido().addAll(formiga.getTrajetoCidades());
+		estatisticas.add(estatistica);
+	}
 
-		  public List<Caminho> getMelhorCaminho() {
-					return melhorCaminho;
-		  }
+	public long getTempoExecucao() {
+		return horarioFinal - horarioInicial;
+	}
 
-		  public double getMenorCaminhoPercorrido() {
-					return menorCaminhoPercorrido;
-		  }
+	public List<Caminho> getMelhorCaminho() {
+		return melhorCaminho;
+	}
 
-		  public Long getMenorTempo() {
-					return menorTempo;
-		  }
+	public double getMenorCaminhoPercorrido() {
+		return menorCaminhoPercorrido;
+	}
 
-		  public List<Estatistica> getEstatisticas() {
-					return estatisticas;
-		  }
+	public Long getMenorTempo() {
+		return menorTempo;
+	}
 
-		  public String printEstatisticas() {
-					StringBuffer buffer = new StringBuffer();
-					buffer.append("\n");
-					buffer.append("***********************************************************************************************\n");
-					buffer.append("**************************************Estatisticas*******************************************\n");
-					buffer.append("***********************************************************************************************\n");
-					buffer.append("Menor Tempo: ");
-					buffer.append(menorTempo);
-					buffer.append(" ms");
-					buffer.append("\n");
-					buffer.append("Menor caminho: ");
-					buffer.append(NumberUtil.getInstance().doubleToString(menorCaminhoPercorrido));
-					buffer.append("\n");
-					buffer.append("Melhor trajeto: ");
-					buffer.append(Arrays.toString(melhorCaminho.toArray()));
-					buffer.append("\n");
-					buffer.append("***********************************************************************************************\n");
-					for (Estatistica e : estatisticas) {
-							  buffer.append("FormigaID: ");
-							  buffer.append(e.getFormigaId());
-							  buffer.append("\n");
-							  buffer.append("Tempo Gasto: ");
-							  buffer.append(e.getTempoGasto());
-							  buffer.append("ms");
-							  buffer.append("\n");
-							  buffer.append("Distancia Percorrida: ");
-							  buffer.append(NumberUtil.getInstance().doubleToString(e.getDistanciaPercorrida()));
-							  buffer.append("\n");
-							  buffer.append("Trajeto: ");
-							  buffer.append(Arrays.toString(e.getCaminhoPercorrido().toArray()));
-							  buffer.append("\n");
-							  buffer.append("***********************************************************************************************\n");
-					}
+	public List<Estatistica> getEstatisticas() {
+		return estatisticas;
+	}
 
-					return buffer.toString();
-		  }
+	public void setHorarioFinal(long horarioFinal) {
+		this.horarioFinal = horarioFinal;
+	}
+
+	public void setHorarioInicial(long horarioInicial) {
+		this.horarioInicial = horarioInicial;
+	}
+
+	public long getHorarioFinal() {
+		return horarioFinal;
+	}
+
+	public long getHorarioInicial() {
+		return horarioInicial;
+	}
+
+	public void loggerEstatisticas() {
+		logger.info("***********************************************************************************************");
+		logger.info("**************************************Estatisticas*******************************************");
+		logger.info("***********************************************************************************************");
+		logger.info("Menor Tempo: " + menorTempo + " ms");
+		logger.info("Menor caminho: " + NumberUtil.getInstance().doubleToString(menorCaminhoPercorrido));
+		logger.info("Melhor trajeto: " + Arrays.toString(melhorCaminho.toArray()));
+		logger.info("Quantidade de solucoes encontradas: " + estatisticas.size());
+		logger.info("***********************************************************************************************");
+		for (Estatistica e : estatisticas) {
+			logger.info("FormigaID: " + e.getFormigaId());
+			logger.info("Tempo Gasto: " + e.getTempoGasto() + " ms");
+			logger.info("Distancia Percorrida: " + NumberUtil.getInstance().doubleToString(e.getDistanciaPercorrida()));
+			logger.info("Trajeto: " + Arrays.toString(e.getCaminhoPercorrido().toArray()));
+			logger.info("***********************************************************************************************");
+		}
+	}
 
 }
