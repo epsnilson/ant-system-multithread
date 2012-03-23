@@ -25,10 +25,11 @@ import br.com.ant.system.util.AntSystemUtil;
 import br.com.ant.system.util.ImportarArquivoCidades;
 
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
 
 public class ColoniaFormigasView extends JFrame {
+	private static final int		_Y					= 1000;
+	private static final int		_X					= 1500;
 	private static final long		serialVersionUID	= 1L;
 	private static final int		LENGHT_VERTEX		= 10;
 
@@ -110,16 +111,12 @@ public class ColoniaFormigasView extends JFrame {
 
 	private void addVertex(Object parent, Cidade c) {
 		if (!mapVertex.containsKey(c)) {
-			x = AntSystemUtil.getIntance().getAleatorio(10, 1500);
-			y = AntSystemUtil.getIntance().getAleatorio(10, 1000);
+			x = AntSystemUtil.getIntance().getAleatorio(10, _X);
+			y = AntSystemUtil.getIntance().getAleatorio(10, _Y);
 
 			Object obj = graph.insertVertex(parent, c.getNome(), c.getNome(), x, y, LENGHT_VERTEX, LENGHT_VERTEX);
 			mapVertex.put(c, obj);
 		}
-	}
-
-	public void plote() {
-
 	}
 
 	public static void main(String[] args) {
