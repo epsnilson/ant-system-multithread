@@ -19,11 +19,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import br.com.ant.system.action.ColoniaFormigaMonothread;
+import br.com.ant.system.action.ColoniaFormigasActionInterface;
 import br.com.ant.system.algoritmo.ASAlgoritmo;
-import br.com.ant.system.controller.ColoniaFormigaMonothread;
 import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
-import br.com.ant.system.interfaces.ColoniaFormigasActionInterface;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
@@ -55,6 +55,7 @@ public class AntSystemApp {
 
 		ColoniaFormigasActionInterface coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
 
+		coloniaFormigaAction.setMaximoIteracoes(1);
 		coloniaFormigaAction.action();
 
 	}

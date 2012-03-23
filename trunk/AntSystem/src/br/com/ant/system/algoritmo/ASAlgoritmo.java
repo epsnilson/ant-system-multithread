@@ -14,6 +14,7 @@
  */
 package br.com.ant.system.algoritmo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -70,7 +71,7 @@ public class ASAlgoritmo {
 		 */
 		for (Iterator<Caminho> it = todasAlternativas.iterator(); it.hasNext();) {
 			Caminho c = (Caminho) it.next();
-			if (!formiga.getCidadesVisitadas().contains(c.getCidadeDestino())) {
+			if (!formiga.getCidadesVisitadas().containsKey(c.getCidadeDestino())) {
 				double probabilidadeCaminho = this.calcularProbabilidadeCaminho(c);
 
 				mapProbabilidadesDisponiveis.put(c, probabilidadeCaminho);
@@ -79,14 +80,15 @@ public class ASAlgoritmo {
 
 		}
 
-		Caminho escolhido = null;
-
 		/*
 		 * se caso nao houver cidades nao visitadas, ira tentar uma soluaca customizada.
 		 */
-		if (mapProbabilidadesDisponiveis.size() == 0) {
-			logger.info("Todas as cidades ja foram visitadas. Utilizando solução customizada.");
+		Caminho escolhido = null;
+		if (mapProbabilidadesDisponiveis.isEmpty()) {
+			logger.info("Todos os caminhos ja foram visitados. Utilizando solução customizada.");
 			Caminho caminhoInverso = formiga.getUltimoCaminho();
+			Map<Integer, List<Caminho>> mapPesos = new HashMap<Integer, List<Caminho>>();
+
 			for (Iterator<Caminho> it = todasAlternativas.iterator(); it.hasNext();) {
 				Caminho c = (Caminho) it.next();
 
@@ -110,24 +112,29 @@ public class ASAlgoritmo {
 				}
 
 				/*
-				 * Ira remover o penultimo caminho, caso o algoritmo tente entrar em estagnação
-				 * entre as cidades.
+				 * Ira utilizar a politica de pesos entre cidades visitadas.
 				 */
-				Caminho penultimoCaminho = formiga.getPenultimoCaminho();
-				if (penultimoCaminho != null && todasAlternativas.size() > 1 && c.getCidadeDestino().equals(penultimoCaminho.getCidadeOrigem())) {
-					logger.info("Penultimo caminho irá levar a uma possivel estagnacao. Sera removida do mapa.");
-					it.remove();
-					continue;
-				}
+				Integer peso = formiga.getCidadesVisitadas().get(c.getCidadeDestino());
+				if (mapPesos.containsKey(peso)) {
+					mapPesos.get(peso).add(c);
+				} else {
+					List<Caminho> caminhos = new ArrayList<Caminho>();
+					caminhos.add(c);
 
-				/*
-				 * se caso as alternativas acima falhar ira calcular a probabilidade apartir das
-				 * cidades restantes.
-				 */
+					mapPesos.put(peso, caminhos);
+				}
+			}
+
+			/*
+			 * Ira fazer a escolha do menor peso a partir de 1 (um)
+			 */
+			List<Caminho> caminhosPesos = this.escolherListaPeso(mapPesos);
+			for (Caminho c : caminhosPesos) {
 				double probabilidadeCaminho = this.calcularProbabilidadeCaminho(c);
 				mapProbabilidadesDisponiveis.put(c, probabilidadeCaminho);
 
 				somaProbabilidadesDisponiveis += probabilidadeCaminho;
+
 			}
 		}
 
@@ -145,6 +152,22 @@ public class ASAlgoritmo {
 
 		return escolhido;
 
+	}
+
+	private List<Caminho> escolherListaPeso(Map<Integer, List<Caminho>> mapPesos) {
+		boolean pesoEscolhido = false;
+		int pesoAtual = 1;
+		List<Caminho> caminhosPesos = null;
+		while (!pesoEscolhido) {
+			if (mapPesos.containsKey(pesoAtual)) {
+				caminhosPesos = mapPesos.get(pesoAtual);
+				pesoEscolhido = true;
+			} else {
+				pesoAtual++;
+			}
+		}
+
+		return caminhosPesos;
 	}
 
 	/**

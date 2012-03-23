@@ -68,9 +68,6 @@ public class ImportarArquivoCidades {
 		Set<Caminho> caminhos = new HashSet<Caminho>();
 		for (int i = 1; i < matrizCidades.length; i++) {
 			String[] linhaArray = matrizCidades[i];
-			if (linhaArray.length != matrizCidades.length) {
-				throw new RuntimeException("Numero de colunas diferente de numeros de linhas");
-			}
 			for (int j = 1; j < linhaArray.length; j++) {
 				String distanciaStr = matrizCidades[i][j];
 				if (StringUtils.isNotEmpty(distanciaStr)) {

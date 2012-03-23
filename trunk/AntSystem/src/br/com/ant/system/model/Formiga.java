@@ -15,34 +15,34 @@
 package br.com.ant.system.model;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public class Formiga implements Cloneable {
-	private int				id;
+	private int						id;
 
-	private Cidade			localizacaoCidadeAtual;
-	private Cidade			localizacaoCidadeInicial;
-	private Caminho			ultimoCaminho;
-	private Caminho			penultimoCaminho;
+	private Cidade					localizacaoCidadeAtual;
+	private Cidade					localizacaoCidadeInicial;
+	private Caminho					ultimoCaminho;
+	private Caminho					penultimoCaminho;
 
-	private Set<Cidade>		cidadesVisitadas	= new HashSet<Cidade>();
-	private List<Caminho>	trajetoCidades		= new LinkedList<Caminho>();
-	private double			distanciaPercorrida;
+	private Map<Cidade, Integer>	cidadesVisitadas	= new HashMap<Cidade, Integer>();
+	private List<Caminho>			trajetoCidades		= new LinkedList<Caminho>();
+	private double					distanciaPercorrida;
 
-	private long			tempoInicial;
-	private long			tempoFinal;
+	private long					tempoInicial;
+	private long					tempoFinal;
 
-	boolean					todasVisitadas;
+	boolean							todasVisitadas;
 
 	public Formiga(int number, Cidade localizacaoAtual) {
 		if (localizacaoAtual == null) {
 			throw new RuntimeException("Localizacao atual nao pode ser nula");
 		}
 
-		this.cidadesVisitadas.add(localizacaoAtual);
+		this.cidadesVisitadas.put(localizacaoAtual, 1);
 		this.localizacaoCidadeAtual = localizacaoAtual;
 		this.localizacaoCidadeInicial = localizacaoAtual;
 		this.id = number;
@@ -64,7 +64,12 @@ public class Formiga implements Cloneable {
 		this.penultimoCaminho = this.ultimoCaminho;
 		this.ultimoCaminho = caminho;
 
-		this.cidadesVisitadas.add(caminho.getCidadeDestino());
+		if (this.cidadesVisitadas.containsKey(caminho.getCidadeDestino())) {
+			int peso = this.cidadesVisitadas.get(caminho.getCidadeDestino()) + 1;
+			this.cidadesVisitadas.put(caminho.getCidadeDestino(), peso);
+		} else {
+			this.cidadesVisitadas.put(caminho.getCidadeDestino(), 1);
+		}
 		this.trajetoCidades.add(caminho);
 		this.distanciaPercorrida += caminho.getDistancia();
 
@@ -87,10 +92,10 @@ public class Formiga implements Cloneable {
 	}
 
 	public boolean isCidadeVisitada(Cidade cidade) {
-		return cidadesVisitadas.contains(cidade);
+		return cidadesVisitadas.containsKey(cidade);
 	}
 
-	public Set<Cidade> getCidadesVisitadas() {
+	public Map<Cidade, Integer> getCidadesVisitadas() {
 		return cidadesVisitadas;
 	}
 
