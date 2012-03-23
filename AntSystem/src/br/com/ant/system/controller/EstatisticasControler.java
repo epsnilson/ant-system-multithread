@@ -36,6 +36,9 @@ public class EstatisticasControler {
 	private List<Caminho>					melhorCaminho	= new LinkedList<Caminho>();
 	private double							menorCaminhoPercorrido;
 	private Long							tempoGastoMelhorCaminho;
+
+	private int								numeroIteracoes;
+
 	private long							horarioInicial;
 	private long							horarioFinal;
 
@@ -117,10 +120,19 @@ public class EstatisticasControler {
 		return horarioInicial;
 	}
 
+	public void setNumeroIteracoes(int numeroIteracoes) {
+		this.numeroIteracoes = numeroIteracoes;
+	}
+
+	public int getNumeroIteracoes() {
+		return numeroIteracoes;
+	}
+
 	public void loggerEstatisticas() {
 		logger.info("***********************************************************************************************");
 		logger.info("**************************************Estatisticas*******************************************");
 		logger.info("***********************************************************************************************");
+		logger.info("Quantidade de Iteracoes: " + numeroIteracoes);
 		logger.info("Menor caminho: " + menorCaminhoPercorrido);
 		logger.info("Melhor trajeto: " + Arrays.toString(melhorCaminho.toArray()));
 		logger.info("Tempo Gasto no melhor caminho: " + tempoGastoMelhorCaminho + " ms");
