@@ -32,8 +32,8 @@ public class NumberUtil {
 
 	private NumberUtil() {
 		df = new DecimalFormat();
-		df.setMaximumFractionDigits(10);
-		df.setMinimumFractionDigits(10);
+		df.setMaximumFractionDigits(50);
+		df.setMinimumFractionDigits(50);
 
 	}
 

@@ -24,7 +24,6 @@ import org.apache.log4j.Logger;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Estatistica;
 import br.com.ant.system.model.Formiga;
-import br.com.ant.system.util.NumberUtil;
 
 /**
  * Classe responsavel pela coletas de estaticas da execucao do algoritmo.
@@ -36,7 +35,7 @@ public class EstatisticasControler {
 
 	private List<Caminho>					melhorCaminho	= new LinkedList<Caminho>();
 	private double							menorCaminhoPercorrido;
-	private Long							menorTempo;
+	private Long							tempoGastoMelhorCaminho;
 	private long							horarioInicial;
 	private long							horarioFinal;
 
@@ -63,10 +62,11 @@ public class EstatisticasControler {
 			menorCaminhoPercorrido = formiga.getDistanciaPercorrida();
 
 			// Copiando a o caminho percorrido para o melhor caminho.
+			melhorCaminho.clear();
 			melhorCaminho.addAll(formiga.getTrajetoCidades());
 
 			// Setando o menor tempo.
-			menorTempo = (formiga.getTempoFinal() - formiga.getTempoInicial());
+			tempoGastoMelhorCaminho = (formiga.getTempoFinal() - formiga.getTempoInicial());
 		}
 	}
 
@@ -75,6 +75,7 @@ public class EstatisticasControler {
 		estatistica.setFormigaId(formiga.getId());
 		estatistica.setDistanciaPercorrida(formiga.getDistanciaPercorrida());
 		estatistica.setTempoGasto(formiga.getTempoFinal() - formiga.getTempoInicial());
+		estatistica.setCidadeInicial(formiga.getLocalizacaoCidadeInicial());
 
 		estatistica.getCaminhoPercorrido().addAll(formiga.getTrajetoCidades());
 		estatisticas.add(estatistica);
@@ -92,8 +93,8 @@ public class EstatisticasControler {
 		return menorCaminhoPercorrido;
 	}
 
-	public Long getMenorTempo() {
-		return menorTempo;
+	public Long getTempoGastoMelhorCaminho() {
+		return tempoGastoMelhorCaminho;
 	}
 
 	public List<Estatistica> getEstatisticas() {
@@ -120,15 +121,16 @@ public class EstatisticasControler {
 		logger.info("***********************************************************************************************");
 		logger.info("**************************************Estatisticas*******************************************");
 		logger.info("***********************************************************************************************");
-		logger.info("Menor Tempo: " + menorTempo + " ms");
-		logger.info("Menor caminho: " + NumberUtil.getInstance().doubleToString(menorCaminhoPercorrido));
+		logger.info("Menor caminho: " + menorCaminhoPercorrido);
 		logger.info("Melhor trajeto: " + Arrays.toString(melhorCaminho.toArray()));
+		logger.info("Tempo Gasto no melhor caminho: " + tempoGastoMelhorCaminho + " ms");
 		logger.info("Quantidade de solucoes encontradas: " + estatisticas.size());
 		logger.info("***********************************************************************************************");
 		for (Estatistica e : estatisticas) {
 			logger.info("FormigaID: " + e.getFormigaId());
+			logger.info("Cidade Inicial: " + e.getCidadeInicial());
 			logger.info("Tempo Gasto: " + e.getTempoGasto() + " ms");
-			logger.info("Distancia Percorrida: " + NumberUtil.getInstance().doubleToString(e.getDistanciaPercorrida()));
+			logger.info("Distancia Percorrida: " + e.getDistanciaPercorrida());
 			logger.info("Trajeto: " + Arrays.toString(e.getCaminhoPercorrido().toArray()));
 			logger.info("***********************************************************************************************");
 		}

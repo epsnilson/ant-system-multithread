@@ -14,11 +14,13 @@
  */
 package br.com.ant.system.controller;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import br.com.ant.system.algoritmo.ASAlgoritmo;
+import br.com.ant.system.interfaces.ColoniaFormigasActionInterface;
 
 /**
  * Classe que executa o algoritmo em monothread.
@@ -26,7 +28,7 @@ import br.com.ant.system.algoritmo.ASAlgoritmo;
  * @author j.duarte
  * 
  */
-public class ColoniaFormigaMonothreadController {
+public class ColoniaFormigaMonothread implements ColoniaFormigasActionInterface {
 
 	private static final int		MAXIMO_INTERACOES	= 1;
 	private List<FormigaController>	formigas;
@@ -34,7 +36,9 @@ public class ColoniaFormigaMonothreadController {
 	private PercursoController		percursoController;
 	private FeromonioController		feromonioController;
 
-	public ColoniaFormigaMonothreadController(List<FormigaController> formigas, ASAlgoritmo algoritmo, PercursoController controller) {
+	private SimpleDateFormat		horaFormat			= new SimpleDateFormat("HH:mm:ss:SSS");
+
+	public ColoniaFormigaMonothread(List<FormigaController> formigas, ASAlgoritmo algoritmo, PercursoController controller) {
 		this.formigas = formigas;
 		this.percursoController = controller;
 		this.feromonioController = new FeromonioController(algoritmo, percursoController);
@@ -42,14 +46,17 @@ public class ColoniaFormigaMonothreadController {
 		algoritmo.inicializarFeromonio(controller.getCaminhosDisponiveis(), controller.getCidadesPercurso().size());
 	}
 
-	public void run() {
+	/**
+	 * Executa o algoritmo.
+	 */
+	public void action() {
 		logger.info("Iniciando a execução do Algoritmo...");
 		logger.info("Maximo Interacoes: " + MAXIMO_INTERACOES);
 		logger.info("Quantidade de formigas: " + formigas.size());
 		logger.info("Quantidade de cidades: " + percursoController.getCidadesPercurso());
 
 		EstatisticasControler.getInstance().setHorarioInicial(System.currentTimeMillis());
-		logger.info("Horario Inicial: " + EstatisticasControler.getInstance().getHorarioInicial());
+		logger.info("Horario Inicial: " + horaFormat.format(EstatisticasControler.getInstance().getHorarioInicial()));
 
 		for (int i = 0; i < MAXIMO_INTERACOES; i++) {
 			logger.info("************** Iteracao N. " + i + " ******************");
@@ -82,11 +89,11 @@ public class ColoniaFormigaMonothreadController {
 		}
 
 		EstatisticasControler.getInstance().setHorarioFinal(System.currentTimeMillis());
-		logger.info("Horario Final: " + EstatisticasControler.getInstance().getHorarioFinal());
-		logger.info("Tempo de execucao: " + EstatisticasControler.getInstance().getTempoExecucao());
 
 		// Exibindo dados da estatisticos.
 		EstatisticasControler.getInstance().loggerEstatisticas();
 
+		logger.info("Horario Final: " + horaFormat.format(EstatisticasControler.getInstance().getHorarioFinal()));
+		logger.info("Tempo de execucao: " + horaFormat.format(EstatisticasControler.getInstance().getTempoExecucao()));
 	}
 }

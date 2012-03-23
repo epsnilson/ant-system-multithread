@@ -139,6 +139,8 @@ public class ASAlgoritmo {
 			escolhido = this.buscarMelhorCaminho(mapProbabilidadesDisponiveis, somaProbabilidadesDisponiveis);
 		}
 
+		logger.info("Caminho escolhido: " + escolhido.toString());
+
 		mapProbabilidadesDisponiveis = null;
 
 		return escolhido;
@@ -166,9 +168,6 @@ public class ASAlgoritmo {
 				melhorCaminho = c;
 			}
 		}
-
-		logger.info("Caminho escolhido: " + melhorCaminho.toString());
-
 		return melhorCaminho;
 	}
 
