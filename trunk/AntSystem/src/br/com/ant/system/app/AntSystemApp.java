@@ -20,9 +20,10 @@ import java.util.List;
 import java.util.Set;
 
 import br.com.ant.system.algoritmo.ASAlgoritmo;
-import br.com.ant.system.controller.ColoniaFormigaMonothreadController;
+import br.com.ant.system.controller.ColoniaFormigaMonothread;
 import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
+import br.com.ant.system.interfaces.ColoniaFormigasActionInterface;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
@@ -45,16 +46,16 @@ public class AntSystemApp {
 		ASAlgoritmo algoritmo = new ASAlgoritmo();
 
 		List<FormigaController> formigas = new ArrayList<FormigaController>();
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < percurso.getCidadesPercurso().size(); i++) {
 			Cidade atuaCidade = percurso.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(1, 6));
 			Formiga formiga = new Formiga(i, atuaCidade);
 
 			formigas.add(new FormigaController(formiga, percurso, algoritmo));
 		}
 
-		ColoniaFormigaMonothreadController controller = new ColoniaFormigaMonothreadController(formigas, algoritmo, percurso);
+		ColoniaFormigasActionInterface coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
 
-		controller.run();
+		coloniaFormigaAction.action();
 
 	}
 }

@@ -30,4 +30,19 @@ public class Cidade {
 		return nome;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		Cidade c = (Cidade) obj;
+		if (c.getNome().equals(nome)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return nome.hashCode();
+	}
+
 }
