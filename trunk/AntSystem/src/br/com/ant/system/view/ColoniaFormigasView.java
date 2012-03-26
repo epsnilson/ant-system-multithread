@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import br.com.ant.system.action.ColoniaFormigaMonothread;
 import br.com.ant.system.action.ColoniaFormigasActionInterface;
@@ -21,10 +22,13 @@ import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
+import br.com.ant.system.notificacao.NotificationController;
 import br.com.ant.system.util.AntSystemUtil;
 import br.com.ant.system.util.ImportarArquivoCidades;
 
+import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
 
 public class ColoniaFormigasView extends JFrame {
@@ -45,10 +49,13 @@ public class ColoniaFormigasView extends JFrame {
 	ColoniaFormigasActionInterface	coloniaFormigaAction;
 
 	public ColoniaFormigasView() {
+		NotificationController notificacaoController = NotificationController.getInstance();
+		notificacaoController.setView(this);
+
 		percurso = new PercursoController();
 
 		ImportarArquivoCidades imp = new ImportarArquivoCidades();
-		Set<Caminho> caminhos = imp.importarAquivo("c:/distancias.csv");
+		final Set<Caminho> caminhos = imp.importarAquivo("c:/distancias.csv");
 
 		for (Iterator<Caminho> it = caminhos.iterator(); it.hasNext();) {
 			Caminho c = (Caminho) it.next();
@@ -67,6 +74,26 @@ public class ColoniaFormigasView extends JFrame {
 
 		coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
 
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				montarGrafo(caminhos);
+			}
+		});
+
+		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+			@Override
+			protected Void doInBackground() throws Exception {
+				coloniaFormigaAction.setMaximoIteracoes(1000);
+				coloniaFormigaAction.action();
+				return null;
+			}
+		};
+		worker.execute();
+	}
+
+	private void montarGrafo(Set<Caminho> caminhos) {
 		graph = new mxGraph();
 		graph.setKeepEdgesInBackground(true);
 		graph.setCellsLocked(true);
@@ -88,22 +115,14 @@ public class ColoniaFormigasView extends JFrame {
 
 		mxGraphComponent graphComponent = new mxGraphComponent(graph);
 		getContentPane().add(graphComponent);
-
-		SwingUtilities.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				coloniaFormigaAction.setMaximoIteracoes(1);
-				coloniaFormigaAction.action();
-			}
-		});
 	}
 
 	private void addEdge(Object parent, Caminho c) {
 		if (!mapEdge.containsKey(c)) {
 			Object origem = mapVertex.get(c.getCidadeOrigem());
 			Object destino = mapVertex.get(c.getCidadeDestino());
-			Object obj = graph.insertEdge(parent, null, null, origem, destino);
+			mxCell obj = (mxCell) graph.insertEdge(parent, null, null, origem, destino);
+			obj.setVisible(false);
 
 			mapEdge.put(c, obj);
 		}
@@ -117,6 +136,27 @@ public class ColoniaFormigasView extends JFrame {
 			Object obj = graph.insertVertex(parent, c.getNome(), c.getNome(), x, y, LENGHT_VERTEX, LENGHT_VERTEX);
 			mapVertex.put(c, obj);
 		}
+	}
+
+	public void updateEdge(final Caminho c) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				mxCell cell = (mxCell) mapEdge.get(c);
+				try {
+					graph.getModel().beginUpdate();
+					graph.getModel().setVisible(cell, true);
+
+				} finally {
+					try {
+						graph.getModel().endUpdate();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+
+			}
+		});
 	}
 
 	public static void main(String[] args) {

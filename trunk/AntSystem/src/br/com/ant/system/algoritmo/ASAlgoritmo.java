@@ -128,13 +128,15 @@ public class ASAlgoritmo {
 			/*
 			 * Ira fazer a escolha do menor peso a partir de 1 (um)
 			 */
-			List<Caminho> caminhosPesos = this.escolherListaPeso(mapPesos);
-			for (Caminho c : caminhosPesos) {
-				double probabilidadeCaminho = this.calcularProbabilidadeCaminho(c);
-				mapProbabilidadesDisponiveis.put(c, probabilidadeCaminho);
+			if (escolhido == null) {
+				List<Caminho> caminhosPesos = this.escolherListaPeso(mapPesos);
+				for (Caminho c : caminhosPesos) {
+					double probabilidadeCaminho = this.calcularProbabilidadeCaminho(c);
+					mapProbabilidadesDisponiveis.put(c, probabilidadeCaminho);
 
-				somaProbabilidadesDisponiveis += probabilidadeCaminho;
+					somaProbabilidadesDisponiveis += probabilidadeCaminho;
 
+				}
 			}
 		}
 
