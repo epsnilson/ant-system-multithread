@@ -1,9 +1,21 @@
+/**
+ *  This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *   
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *   
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package br.com.ant.system.view;
 
-import java.awt.DisplayMode;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -11,8 +23,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
+
+import org.apache.log4j.Logger;
 
 import br.com.ant.system.action.ColoniaFormigaMonothread;
 import br.com.ant.system.action.ColoniaFormigasActionInterface;
@@ -22,35 +36,44 @@ import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
+import br.com.ant.system.notificacao.Notificacao;
+import br.com.ant.system.notificacao.Notificacao.NotificacaoEnum;
 import br.com.ant.system.notificacao.NotificationController;
 import br.com.ant.system.util.AntSystemUtil;
 import br.com.ant.system.util.ImportarArquivoCidades;
 
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGeometry;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
 
 public class ColoniaFormigasView extends JFrame {
-	private static final int		_Y					= 1000;
-	private static final int		_X					= 1500;
-	private static final long		serialVersionUID	= 1L;
-	private static final int		LENGHT_VERTEX		= 10;
+	private static final String		EDGE_STYLE				= "startArrow=none;endArrow=none";
+	private static final String		IMAGEM_FORMIGA_PATH		= "br/com/ant/system/images/images.png";
+	private static final int		_Y						= 700;
+	private static final int		_X						= 900;
+	private static final long		serialVersionUID		= 1L;
+	private static final int		LENGHT_VERTEX_CIDADE	= 10;
+	private static final int		LENGHT_VERTEX_FORMIGA	= 50;
 
-	private int						x					= 5;
-	private int						y					= 5;
+	private int						x						= 5;
+	private int						y						= 5;
 
 	Set<Caminho>					caminhos;
-	Map<Cidade, Object>				mapVertex			= new HashMap<Cidade, Object>();
-	Map<Caminho, Object>			mapEdge				= new HashMap<Caminho, Object>();
+	Map<Cidade, Object>				mapVertexCidade			= new HashMap<Cidade, Object>();
+	Map<Integer, Object>			mapVertexFormiga		= new HashMap<Integer, Object>();
+	Map<Caminho, Object>			mapEdge					= new HashMap<Caminho, Object>();
+
 	mxGraph							graph;
 
 	PercursoController				percurso;
 	ColoniaFormigasActionInterface	coloniaFormigaAction;
 
+	Logger							logger					= Logger.getLogger(this.getClass());
+	NotificationImp					notificationImp;
+
 	public ColoniaFormigasView() {
-		NotificationController notificacaoController = NotificationController.getInstance();
-		notificacaoController.setView(this);
+		notificationImp = new NotificationImp();
 
 		percurso = new PercursoController();
 
@@ -70,30 +93,41 @@ public class ColoniaFormigasView extends JFrame {
 			Formiga formiga = new Formiga(i, atuaCidade);
 
 			formigas.add(new FormigaController(formiga, percurso, algoritmo));
+
 		}
 
 		coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
 
-		SwingUtilities.invokeLater(new Runnable() {
+		// Montando o grafo das cidades.
+		this.montarGrafo(caminhos, formigas);
 
-			@Override
-			public void run() {
-				montarGrafo(caminhos);
-			}
-		});
+		this.execute();
+	}
 
+	private void execute() {
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 			@Override
 			protected Void doInBackground() throws Exception {
-				coloniaFormigaAction.setMaximoIteracoes(1000);
+				coloniaFormigaAction.setMaximoIteracoes(10);
 				coloniaFormigaAction.action();
 				return null;
+			}
+
+			@Override
+			protected void done() {
+				try {
+					get();
+					JOptionPane.showMessageDialog(null, "Finalizado com sucesso.");
+				} catch (Exception e) {
+					logger.error("Houve um erro na execucao do algoritmo", e);
+					JOptionPane.showMessageDialog(null, "Houve um erro na execucao do algoritmo.");
+				}
 			}
 		};
 		worker.execute();
 	}
 
-	private void montarGrafo(Set<Caminho> caminhos) {
+	private void montarGrafo(Collection<Caminho> caminhos, List<FormigaController> formigas) {
 		graph = new mxGraph();
 		graph.setKeepEdgesInBackground(true);
 		graph.setCellsLocked(true);
@@ -103,12 +137,15 @@ public class ColoniaFormigasView extends JFrame {
 
 		try {
 			for (Caminho c : percurso.getCaminhosDisponiveis()) {
-				this.addVertex(parent, c.getCidadeOrigem());
-				this.addVertex(parent, c.getCidadeDestino());
+				this.addVertexCidade(parent, c.getCidadeOrigem());
+				this.addVertexCidade(parent, c.getCidadeDestino());
 
-				addEdge(parent, c);
+				this.addEdge(parent, c);
 			}
 
+			for (FormigaController formiga : formigas) {
+				this.addVertexFormiga(parent, formiga.getFormiga());
+			}
 		} finally {
 			graph.getModel().endUpdate();
 		}
@@ -119,58 +156,134 @@ public class ColoniaFormigasView extends JFrame {
 
 	private void addEdge(Object parent, Caminho c) {
 		if (!mapEdge.containsKey(c)) {
-			Object origem = mapVertex.get(c.getCidadeOrigem());
-			Object destino = mapVertex.get(c.getCidadeDestino());
-			mxCell obj = (mxCell) graph.insertEdge(parent, null, null, origem, destino);
-			obj.setVisible(false);
+			Object origem = mapVertexCidade.get(c.getCidadeOrigem());
+			Object destino = mapVertexCidade.get(c.getCidadeDestino());
 
+			String style = EDGE_STYLE + ";strokeColor=#FFFFFF";
+
+			mxCell obj = (mxCell) graph.insertEdge(parent, null, null, origem, destino, style);
+
+			// obj.setVisible(false);
 			mapEdge.put(c, obj);
 		}
 	}
 
-	private void addVertex(Object parent, Cidade c) {
-		if (!mapVertex.containsKey(c)) {
+	private void addVertexCidade(Object parent, Cidade c) {
+		if (!mapVertexCidade.containsKey(c)) {
 			x = AntSystemUtil.getIntance().getAleatorio(10, _X);
 			y = AntSystemUtil.getIntance().getAleatorio(10, _Y);
 
-			Object obj = graph.insertVertex(parent, c.getNome(), c.getNome(), x, y, LENGHT_VERTEX, LENGHT_VERTEX);
-			mapVertex.put(c, obj);
+			Object obj = graph.insertVertex(parent, c.getNome(), c.getNome(), x, y, LENGHT_VERTEX_CIDADE, LENGHT_VERTEX_CIDADE);
+			mapVertexCidade.put(c, obj);
+		}
+	}
+
+	private void addVertexFormiga(Object parent, Formiga f) {
+		if (!mapVertexFormiga.containsKey(f.getId())) {
+			mxCell cell = (mxCell) mapVertexCidade.get(f.getLocalizacaoCidadeInicial());
+
+			x = cell.getGeometry().getPoint().x;
+			y = cell.getGeometry().getPoint().y;
+
+			String imagemPath = Thread.currentThread().getContextClassLoader().getResource(IMAGEM_FORMIGA_PATH).getPath();
+
+			String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter;imageWidth=1000;imageHeight=1000;shape=image;image=file:" + imagemPath;
+			Object obj = graph.insertVertex(parent, String.valueOf(f.getId()), String.valueOf(f.getId()), x, y, LENGHT_VERTEX_FORMIGA, LENGHT_VERTEX_FORMIGA, style);
+			mapVertexFormiga.put(f.getId(), obj);
+		}
+	}
+
+	public void updateVertexFormiga(final Formiga f) {
+		mxCell cell = (mxCell) mapVertexFormiga.get(f.getId());
+		try {
+			graph.getModel().beginUpdate();
+
+			mxCell cidade = (mxCell) mapVertexCidade.get(f.getLocalizacaoCidadeAtual());
+
+			mxGeometry geometry = cidade.getGeometry();
+			geometry.setHeight(LENGHT_VERTEX_FORMIGA);
+			geometry.setWidth(LENGHT_VERTEX_FORMIGA);
+
+			graph.getModel().setGeometry(cell, geometry);
+		} finally {
+			graph.getModel().endUpdate();
 		}
 	}
 
 	public void updateEdge(final Caminho c) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				mxCell cell = (mxCell) mapEdge.get(c);
-				try {
-					graph.getModel().beginUpdate();
-					graph.getModel().setVisible(cell, true);
+		// mxCell cell = (mxCell) mapEdge.get(c);
+		// try {
+		// graph.getModel().beginUpdate();
+		// } finally {
+		// try {
+		// graph.getModel().endUpdate();
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
+	}
 
-				} finally {
-					try {
-						graph.getModel().endUpdate();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+	public void updateEdgeFeromonio(final Caminho c) {
+		mxCell cell = (mxCell) mapEdge.get(c);
+		try {
+			graph.getModel().beginUpdate();
+			String color = null;
+			if (c.getFeromonio().getQntFeromonio() <= 0.0001) {
+				color = ";strokeColor=#C3C3C3";
+			} else if (c.getFeromonio().getQntFeromonio() <= 0.00013) {
+				color = ";strokeColor=#6F6D6D";
+			} else {
+				color = ";strokeColor=#000000";
+			}
+
+			String style = EDGE_STYLE + color;
+
+			graph.getModel().remove(cell);
+			Object newCell = graph.insertEdge(cell.getParent(), null, null, cell.getSource(), cell.getTarget(), style);
+
+			mapEdge.put(c, newCell);
+
+			cell = null;
+
+		} finally {
+			try {
+				graph.getModel().endUpdate();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	public class NotificationImp implements Runnable {
+		private NotificationImp() {
+			Thread thread = new Thread(this);
+			thread.start();
+		}
+
+		@Override
+		public void run() {
+			while (true) {
+				Notificacao notificacao = NotificationController.getInstance().takeNotificacao();
+				Object obj = notificacao.getObj();
+
+				if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.CAMINHO)) {
+
+					Caminho c = (Caminho) obj;
+					updateEdge(c);
+				} else if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.FORMIGA)) {
+					Formiga formiga = (Formiga) obj;
+
+					updateVertexFormiga(formiga);
+				} else if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.FEROMONIO)) {
+					Caminho c = (Caminho) obj;
+
+					updateEdgeFeromonio(c);
 				}
 
+				// pack();
 			}
-		});
+		}
 	}
 
-	public static void main(String[] args) {
-		ColoniaFormigasView frame = new ColoniaFormigasView();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		GraphicsDevice[] devices = env.getScreenDevices();
-
-		DisplayMode mode = devices[0].getDisplayMode();
-		int height = mode.getHeight();
-		int width = mode.getWidth();
-
-		frame.setSize(width, height - 30);
-		frame.setVisible(true);
-	}
 }
