@@ -23,6 +23,7 @@ import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
 import br.com.ant.system.notificacao.Notificacao;
+import br.com.ant.system.notificacao.Notificacao.NotificacaoEnum;
 import br.com.ant.system.notificacao.NotificationController;
 import br.com.ant.system.util.AntSystemUtil;
 
@@ -67,9 +68,16 @@ public class FormigaController {
 		// atualiza a localização atual da formiga e o estado da cidade.
 		formiga.addCaminho(caminhoEscolhido);
 
+		// Enviando mensagem de notificacao
 		Notificacao notificao = new Notificacao();
 		notificao.setObj(caminhoEscolhido);
+		notificao.setTipoNotificacao(NotificacaoEnum.CAMINHO);
 		NotificationController.getInstance().addNotificacao(notificao);
+
+		Notificacao notificaoFormiga = new Notificacao();
+		notificaoFormiga.setObj(formiga);
+		notificaoFormiga.setTipoNotificacao(NotificacaoEnum.FORMIGA);
+		NotificationController.getInstance().addNotificacao(notificaoFormiga);
 
 		return caminhoEscolhido;
 	}

@@ -1,19 +1,29 @@
+/**
+ *  This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *   
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *   
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package br.com.ant.system.notificacao;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
 
-import br.com.ant.system.model.Caminho;
-import br.com.ant.system.view.ColoniaFormigasView;
-
-public class NotificationController implements Runnable {
+public class NotificationController {
 
 	private static final int				MAX_CAPACITY	= 1000;
 	ArrayBlockingQueue<Notificacao>			notificacoes	= new ArrayBlockingQueue<Notificacao>(MAX_CAPACITY);
 	Logger									logger			= Logger.getLogger(this.getClass());
 
-	ColoniaFormigasView						view;
 	private static NotificationController	instance;
 
 	public static NotificationController getInstance() {
@@ -25,40 +35,17 @@ public class NotificationController implements Runnable {
 	}
 
 	private NotificationController() {
-		Thread thread = new Thread(this);
-		thread.start();
-	}
-
-	public ColoniaFormigasView getView() {
-		return view;
-	}
-
-	public void setView(ColoniaFormigasView view) {
-		this.view = view;
-	}
-
-	@Override
-	public void run() {
-		while (true) {
-			try {
-				Notificacao notificacao = notificacoes.take();
-				Object obj = notificacao.getObj();
-
-				if (obj instanceof Caminho) {
-					Caminho c = (Caminho) obj;
-
-					if (view != null) {
-						view.updateEdge(c);
-					}
-				}
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				logger.error("Ocorreu um erro ao enviar a notificacao: ", e);
-			}
-		}
 	}
 
 	public void addNotificacao(Notificacao notificao) {
 		notificacoes.offer(notificao);
+	}
+
+	public Notificacao takeNotificacao() {
+		try {
+			return notificacoes.take();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

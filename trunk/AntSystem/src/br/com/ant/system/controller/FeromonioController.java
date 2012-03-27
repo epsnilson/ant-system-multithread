@@ -19,6 +19,9 @@ import java.util.List;
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Formiga;
+import br.com.ant.system.notificacao.Notificacao;
+import br.com.ant.system.notificacao.NotificationController;
+import br.com.ant.system.notificacao.Notificacao.NotificacaoEnum;
 
 /**
  * Classe responsaveis pelas acoes de cada formiga.
@@ -51,14 +54,26 @@ public class FeromonioController {
 			double novaQntFeromonio = algoritmo.atualizarFeromonio(c.getFeromonio().getQntFeromonio(), formiga.getDistanciaPercorrida());
 			c.getFeromonio().setQntFeromonio(novaQntFeromonio);
 
+			Notificacao notificacao = new Notificacao();
+			notificacao.setTipoNotificacao(NotificacaoEnum.FEROMONIO);
+			notificacao.setObj(c);
+
+			NotificationController.getInstance().addNotificacao(notificacao);
+
 			// Setando nova quantidade de feromonio no caminho inverso.
 			List<Caminho> caminhos = percursoController.getAlternativas(c.getCidadeDestino());
 			for (Caminho caminhoInverso : caminhos) {
 				if (caminhoInverso.getCidadeDestino().equals(c.getCidadeOrigem())) {
 					caminhoInverso.getFeromonio().setQntFeromonio(novaQntFeromonio);
+					Notificacao notificacaoInverso = new Notificacao();
+					notificacaoInverso.setTipoNotificacao(NotificacaoEnum.FEROMONIO);
+					notificacaoInverso.setObj(caminhoInverso);
+
+					NotificationController.getInstance().addNotificacao(notificacaoInverso);
 					break;
 				}
 			}
+
 		}
 	}
 

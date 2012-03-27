@@ -14,49 +14,44 @@
  */
 package br.com.ant.system.app;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 
-import br.com.ant.system.action.ColoniaFormigaMonothread;
-import br.com.ant.system.action.ColoniaFormigasActionInterface;
-import br.com.ant.system.algoritmo.ASAlgoritmo;
-import br.com.ant.system.controller.FormigaController;
-import br.com.ant.system.controller.PercursoController;
-import br.com.ant.system.model.Caminho;
-import br.com.ant.system.model.Cidade;
-import br.com.ant.system.model.Formiga;
-import br.com.ant.system.util.AntSystemUtil;
-import br.com.ant.system.util.ImportarArquivoCidades;
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+
+import org.apache.commons.lang.SystemUtils;
+
+import br.com.ant.system.view.ColoniaFormigasView;
+
+import com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel;
 
 public class AntSystemApp {
 
 	public static void main(String[] args) {
-		PercursoController percurso = new PercursoController();
 
-		ImportarArquivoCidades imp = new ImportarArquivoCidades();
-		Set<Caminho> caminhos = imp.importarAquivo("c:/distancias.csv");
+		try {
+			if (SystemUtils.IS_OS_WINDOWS) {
+				UIManager.setLookAndFeel(WindowsClassicLookAndFeel.class.getName());
+			} else {
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			}
+			
+			ColoniaFormigasView frame = new ColoniaFormigasView();
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		for (Iterator<Caminho> it = caminhos.iterator(); it.hasNext();) {
-			Caminho c = (Caminho) it.next();
-			percurso.addCaminho(c);
+			GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			GraphicsDevice[] devices = env.getScreenDevices();
+
+			DisplayMode mode = devices[0].getDisplayMode();
+			int height = mode.getHeight();
+			int width = mode.getWidth();
+
+			frame.setSize(width, height - 30);
+			frame.setVisible(true);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
-
-		ASAlgoritmo algoritmo = new ASAlgoritmo();
-
-		List<FormigaController> formigas = new ArrayList<FormigaController>();
-		for (int i = 0; i < percurso.getCidadesPercurso().size(); i++) {
-			Cidade atuaCidade = percurso.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(1, 6));
-			Formiga formiga = new Formiga(i, atuaCidade);
-
-			formigas.add(new FormigaController(formiga, percurso, algoritmo));
-		}
-
-		ColoniaFormigasActionInterface coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
-
-		coloniaFormigaAction.setMaximoIteracoes(1);
-		coloniaFormigaAction.action();
-
 	}
 }
