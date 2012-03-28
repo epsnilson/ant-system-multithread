@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
@@ -47,9 +48,13 @@ import com.mxgraph.model.mxGeometry;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 
+/**
+ * 
+ * @author j.duarte
+ * 
+ */
 public class ColoniaFormigasView extends JFrame {
 	private static final String		EDGE_STYLE				= "startArrow=none;endArrow=none";
-	private static final String		IMAGEM_FORMIGA_PATH		= "br/com/ant/system/images/images.png";
 	private static final int		_Y						= 700;
 	private static final int		_X						= 900;
 	private static final long		serialVersionUID		= 1L;
@@ -185,7 +190,8 @@ public class ColoniaFormigasView extends JFrame {
 			x = cell.getGeometry().getPoint().x;
 			y = cell.getGeometry().getPoint().y;
 
-			String imagemPath = Thread.currentThread().getContextClassLoader().getResource(IMAGEM_FORMIGA_PATH).getPath();
+			String pathJar = System.getProperty("user.dir");
+			ImageIcon imagemPath = new ImageIcon(pathJar + "\\resources\\imagens\\images.png");
 
 			String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter;imageWidth=1000;imageHeight=1000;shape=image;image=file:" + imagemPath;
 			Object obj = graph.insertVertex(parent, String.valueOf(f.getId()), String.valueOf(f.getId()), x, y, LENGHT_VERTEX_FORMIGA, LENGHT_VERTEX_FORMIGA, style);
@@ -228,9 +234,9 @@ public class ColoniaFormigasView extends JFrame {
 		try {
 			graph.getModel().beginUpdate();
 			String color = null;
-			if (c.getFeromonio().getQntFeromonio() <= 0.0001) {
+			if (c.getFeromonio().getQntFeromonio() <= 0.000070) {
 				color = ";strokeColor=#C3C3C3";
-			} else if (c.getFeromonio().getQntFeromonio() <= 0.00013) {
+			} else if (c.getFeromonio().getQntFeromonio() <= 0.000093) {
 				color = ";strokeColor=#6F6D6D";
 			} else {
 				color = ";strokeColor=#000000";

@@ -1,0 +1,76 @@
+<project name="integradorSpb" default="dist" basedir=".">
+
+	<property name="src" location="../src" />
+	<property name="resources" location="../resources" />
+	<property name="output" location="../output" />
+	<property name="dist" location="../dist" />
+	<property name="config" location="${dist}/config" />
+	<property name="lib" location="../lib" />
+	<property name="imagens" location="${dist}/resources/imagens" />
+	<property name="antsystem-dist" value="antsystem" />
+
+	<path id="project.class.path">
+		<fileset dir="${lib}">
+			<include name="commons/*.jar" />
+			<include name="jgraph/*.jar" />
+			<include name="log4j/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="dist" depends="compile">
+		<tstamp>
+			<format property="TODAY" pattern="yyyyMMdd" />
+		</tstamp>
+		<!-- Criacao JAR Aplicacao -->
+		<jar destfile="${dist}/${antsystem-dist}.jar" manifest="MANIFEST.MF">
+			<fileset dir="${output}">
+				<include name="**/**.class" />
+				<include name="log4j.properties" />
+			</fileset>
+		</jar>
+
+		<!-- Copia diretorio de configuracao -->
+		<copy todir="${imagens}">
+			<fileset dir="${resources}/imagens">
+			</fileset>
+		</copy>
+
+		<!-- Copy Jars do dist dir-->
+		<copy todir="${dist}">
+			<fileset dir="${lib}">
+				<include name="commons/*.jar" />
+				<include name="jgraph/*.jar" />
+				<include name="log4j/*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+
+
+	<target name="compile" depends="clean">
+		<javac source="1.6" srcdir="${src}" destdir="${output}" debug="true" encoding="ISO-8859-1">
+			<classpath refid="project.class.path" />
+		</javac>
+
+		<!-- Copy persistence Homologacao para META-INF -->
+		<copy todir="${output}">
+			<fileset dir="${src}">
+			</fileset>
+		</copy>
+
+		<!-- Copia diretorio de configuracao -->
+		<copy todir="${imagens}">
+			<fileset dir="${resources}/imagens">
+			</fileset>
+		</copy>
+
+	</target>
+
+	<target name="clean">
+		<delete dir="${output}" />
+		<delete dir="${dist}" />
+		<mkdir dir="${output}" />
+		<mkdir dir="${dist}" />
+	</target>
+
+</project>
