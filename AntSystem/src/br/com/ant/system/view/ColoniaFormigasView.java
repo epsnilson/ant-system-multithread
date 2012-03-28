@@ -286,8 +286,6 @@ public class ColoniaFormigasView extends JFrame {
 
 					updateEdgeFeromonio(c);
 				}
-
-				// pack();
 			}
 		}
 	}

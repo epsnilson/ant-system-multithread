@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
 
 public class NotificationController {
 
-	private static final int				MAX_CAPACITY	= 1000;
+	private static final int				MAX_CAPACITY	= 10000;
 	ArrayBlockingQueue<Notificacao>			notificacoes	= new ArrayBlockingQueue<Notificacao>(MAX_CAPACITY);
 	Logger									logger			= Logger.getLogger(this.getClass());
 
@@ -38,7 +38,11 @@ public class NotificationController {
 	}
 
 	public void addNotificacao(Notificacao notificao) {
-		notificacoes.offer(notificao);
+		try {
+			notificacoes.put(notificao);
+		} catch (InterruptedException e) {
+			logger.error("Nao foi possivel incluir a notificacao da fila", e);
+		}
 	}
 
 	public Notificacao takeNotificacao() {
