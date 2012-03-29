@@ -1,13 +1,11 @@
 package br.com.ant.system.multithread.controller;
 
-import java.util.concurrent.Callable;
-
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Formiga;
 
-public class FormigaMultiThreadController implements Callable<Formiga> {
+public class FormigaMultiThreadController {
 
 	private FormigaController	formigaController;
 	private PercursoController	percurso;
@@ -17,8 +15,7 @@ public class FormigaMultiThreadController implements Callable<Formiga> {
 		this.percurso = percurso;
 	}
 
-	@Override
-	public Formiga call() throws Exception {
+	public Formiga call() {
 		do {
 			formigaController.escolherPercurso();
 		} while (!percurso.isFinalizouPercurso(formigaController.getFormiga()));
