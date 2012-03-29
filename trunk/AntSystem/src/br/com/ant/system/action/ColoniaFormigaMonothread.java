@@ -24,6 +24,7 @@ import br.com.ant.system.controller.EstatisticasControler;
 import br.com.ant.system.controller.FeromonioController;
 import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
+import br.com.ant.system.model.Formiga;
 
 /**
  * Classe que executa o algoritmo em monothread.
@@ -42,12 +43,15 @@ public class ColoniaFormigaMonothread implements ColoniaFormigasActionInterface 
 	private SimpleDateFormat		horaFormat		= new SimpleDateFormat("HH:mm:ss:SSS");
 	private SimpleDateFormat		minutoFormat	= new SimpleDateFormat("mm:ss:SSS");
 
-	public ColoniaFormigaMonothread(List<FormigaController> formigas, ASAlgoritmo algoritmo, PercursoController controller) {
-		this.formigas = formigas;
-		this.percursoController = controller;
+	public ColoniaFormigaMonothread(List<Formiga> formigas, ASAlgoritmo algoritmo, PercursoController percurso) {
+		this.percursoController = percurso;
 		this.feromonioController = new FeromonioController(algoritmo, percursoController);
 
-		algoritmo.inicializarFeromonio(controller.getCaminhosDisponiveis(), controller.getCidadesPercurso().size());
+		for (Formiga formiga : formigas) {
+			this.formigas.add(new FormigaController(formiga, percursoController, algoritmo));
+		}
+
+		algoritmo.inicializarFeromonio(percurso.getCaminhosDisponiveis(), percurso.getCidadesPercurso().size());
 	}
 
 	/**

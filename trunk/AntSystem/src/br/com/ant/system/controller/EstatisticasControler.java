@@ -58,7 +58,7 @@ public class EstatisticasControler {
 	private EstatisticasControler() {
 	}
 
-	public void coletarEstatisticas(Formiga formiga) {
+	public synchronized void coletarEstatisticas(Formiga formiga) {
 		this.addEstatistica(formiga);
 
 		if (menorCaminhoPercorrido == 0 || formiga.getDistanciaPercorrida() < menorCaminhoPercorrido) {
