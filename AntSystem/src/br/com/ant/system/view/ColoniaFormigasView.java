@@ -29,10 +29,9 @@ import javax.swing.SwingWorker;
 
 import org.apache.log4j.Logger;
 
-import br.com.ant.system.action.ColoniaFormigaMonothread;
+import br.com.ant.system.action.ColoniaFormigaMultithread;
 import br.com.ant.system.action.ColoniaFormigasActionInterface;
 import br.com.ant.system.algoritmo.ASAlgoritmo;
-import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
@@ -69,6 +68,8 @@ public class ColoniaFormigasView extends JFrame {
 	Map<Integer, Object>			mapVertexFormiga		= new HashMap<Integer, Object>();
 	Map<Caminho, Object>			mapEdge					= new HashMap<Caminho, Object>();
 
+	List<Formiga>					formigas;
+
 	mxGraph							graph;
 
 	PercursoController				percurso;
@@ -92,16 +93,18 @@ public class ColoniaFormigasView extends JFrame {
 
 		ASAlgoritmo algoritmo = new ASAlgoritmo();
 
-		List<FormigaController> formigas = new ArrayList<FormigaController>();
+		List<Formiga> formigas = new ArrayList<Formiga>();
 		for (int i = 0; i < percurso.getCidadesPercurso().size(); i++) {
 			Cidade atuaCidade = percurso.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(1, 6));
 			Formiga formiga = new Formiga(i, atuaCidade);
 
-			formigas.add(new FormigaController(formiga, percurso, algoritmo));
-
+			formigas.add(formiga);
 		}
 
-		coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
+		this.formigas = formigas;
+
+		// coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
+		coloniaFormigaAction = new ColoniaFormigaMultithread(percurso, algoritmo);
 
 		// Montando o grafo das cidades.
 		this.montarGrafo(caminhos, formigas);
@@ -114,6 +117,14 @@ public class ColoniaFormigasView extends JFrame {
 			@Override
 			protected Void doInBackground() throws Exception {
 				coloniaFormigaAction.setMaximoIteracoes(10);
+
+				if (coloniaFormigaAction instanceof ColoniaFormigaMultithread) {
+					ColoniaFormigaMultithread multiThread = (ColoniaFormigaMultithread) coloniaFormigaAction;
+					for (Formiga formiga : formigas) {
+						multiThread.addFormiga(formiga);
+					}
+				}
+
 				coloniaFormigaAction.action();
 				return null;
 			}
@@ -132,7 +143,7 @@ public class ColoniaFormigasView extends JFrame {
 		worker.execute();
 	}
 
-	private void montarGrafo(Collection<Caminho> caminhos, List<FormigaController> formigas) {
+	private void montarGrafo(Collection<Caminho> caminhos, List<Formiga> formigas) {
 		graph = new mxGraph();
 		graph.setKeepEdgesInBackground(true);
 		graph.setCellsLocked(true);
@@ -148,8 +159,8 @@ public class ColoniaFormigasView extends JFrame {
 				this.addEdge(parent, c);
 			}
 
-			for (FormigaController formiga : formigas) {
-				this.addVertexFormiga(parent, formiga.getFormiga());
+			for (Formiga formiga : formigas) {
+				this.addVertexFormiga(parent, formiga);
 			}
 		} finally {
 			graph.getModel().endUpdate();

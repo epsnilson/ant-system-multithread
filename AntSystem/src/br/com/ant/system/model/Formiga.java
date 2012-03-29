@@ -23,6 +23,8 @@ import java.util.Map;
 public class Formiga implements Cloneable {
 	private int						id;
 
+	private int						qntIteracaoExecutadas;
+
 	private Cidade					localizacaoCidadeAtual;
 	private Cidade					localizacaoCidadeInicial;
 	private Caminho					ultimoCaminho;
@@ -152,5 +154,13 @@ public class Formiga implements Cloneable {
 
 	public boolean isTodasVisitadas() {
 		return todasVisitadas;
+	}
+
+	public void setQntIteracaoExecutadas(int qntIteracaoExecutadas) {
+		this.qntIteracaoExecutadas = qntIteracaoExecutadas;
+	}
+
+	public int getQntIteracaoExecutadas() {
+		return qntIteracaoExecutadas;
 	}
 }
