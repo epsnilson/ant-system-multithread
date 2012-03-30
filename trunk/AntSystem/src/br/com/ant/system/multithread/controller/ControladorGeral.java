@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 
@@ -18,23 +19,23 @@ public class ControladorGeral implements Runnable {
 
 	@SuppressWarnings("rawtypes")
 	private Future				auxServicesFuture;
+
 	@SuppressWarnings("rawtypes")
 	private Future				formigaExecutionFuture;
 
-	private Set<Formiga>		formigas	= new HashSet<Formiga>();
-	private ExecutorService		executor	= Executors.newCachedThreadPool();
+	private Set<Formiga>		formigas		= new HashSet<Formiga>();
+	private ExecutorService		executor		= Executors.newCachedThreadPool(new SimpleThreadFactory());
 
-	private Logger				logger		= Logger.getLogger(this.getClass());
+	private Logger				logger			= Logger.getLogger(this.getClass());
 
 	private ASAlgoritmo			algoritmo;
 	private PercursoController	percurso;
 	private BufferBlockingClass	buffer;
-	private int					maximoIteracoes;
+	private AtomicInteger		maximoIteracoes	= new AtomicInteger();
 
-	public ControladorGeral(ASAlgoritmo algoritmo, PercursoController percurso, int maximoIteracoes) {
+	public ControladorGeral(ASAlgoritmo algoritmo, PercursoController percurso) {
 		this.algoritmo = algoritmo;
 		this.percurso = percurso;
-		this.maximoIteracoes = maximoIteracoes;
 
 		this.buffer = new BufferBlockingClass();
 
@@ -75,7 +76,7 @@ public class ControladorGeral implements Runnable {
 		try {
 			buffer.addFomigaExecution(formiga);
 		} catch (InterruptedException e) {
-			logger.error("Nao foi possivel incluir a formiga na fila de execucao.", e);
+			logger.info("Nao foi possivel incluir a formiga na fila de execucao.");
 		}
 	}
 
@@ -84,7 +85,7 @@ public class ControladorGeral implements Runnable {
 		for (Iterator<Formiga> it = formigas.iterator(); it.hasNext();) {
 			Formiga formiga = (Formiga) it.next();
 
-			if (formiga.getQntIteracaoExecutadas() < maximoIteracoes) {
+			if (formiga.getQntIteracaoExecutadas() < maximoIteracoes.get()) {
 				finished = false;
 				break;
 			}
@@ -104,13 +105,21 @@ public class ControladorGeral implements Runnable {
 					formigas.add(formiga);
 
 					// executando a thread
-					if (formiga.getQntIteracaoExecutadas() < maximoIteracoes) {
+					if (formiga.getQntIteracaoExecutadas() < maximoIteracoes.get()) {
 						executor.submit(new MultiThreadDispatched(formiga, percurso, algoritmo, buffer));
 					}
 				} catch (InterruptedException e) {
-					logger.info("Thread de execucao de formigas foi interrompida.", e);
+					logger.info("Thread de execucao de formigas foi interrompida.");
 				}
 			}
 		}
+	}
+
+	public void setMaximoIteracoes(int maximoIteracoes) {
+		this.maximoIteracoes.set(maximoIteracoes);
+	}
+
+	public int getMaximoIteracoes() {
+		return maximoIteracoes.get();
 	}
 }

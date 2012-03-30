@@ -46,7 +46,7 @@ public class AuxServicesUpdateClass implements Runnable {
 				buffer.addFomigaExecution(formiga);
 			}
 		} catch (InterruptedException e) {
-			logger.error("Thread de atualizacao de feromonio interropida.", e);
+			logger.info("Thread de atualizacao de feromonio interropida.");
 		}
 
 	}
