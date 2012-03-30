@@ -31,6 +31,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -94,7 +95,7 @@ public class ColoniaFormigasView extends JFrame {
 
 	JRadioButton					monothreadButton;
 	JRadioButton					multiThreadButton;
-	FileChooserUI					arquivoImportacao;
+	JFileChooser					arquivoImportacao;
 
 	JLabel							iteracoesLabel;
 	NumberField						iteracoesField;
@@ -185,6 +186,15 @@ public class ColoniaFormigasView extends JFrame {
 
 		monothreadButton = new JRadioButton("MonoThread", true);
 		multiThreadButton = new JRadioButton("MultiThread");
+
+		JFileChooser chooser = new JFileChooser();
+		chooser.showOpenDialog(null);
+
+//		jtfCaminho.setText(chooser.getSelectedFile().getAbsolutePath());
+//		CaminhoArq = chooser.getSelectedFile().getAbsolutePath();
+//		if (CaminhoArq != null) {
+//			jbtnImportar.setEnabled(true);
+//		}
 
 		ButtonGroup group = new ButtonGroup();
 		group.add(monothreadButton);
