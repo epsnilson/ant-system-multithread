@@ -14,6 +14,10 @@
  */
 package br.com.ant.system.view;
 
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,13 +26,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.SwingWorker;
+import javax.swing.plaf.FileChooserUI;
 
 import org.apache.log4j.Logger;
 
+import br.com.ant.system.action.ColoniaFormigaMonothread;
 import br.com.ant.system.action.ColoniaFormigaMultithread;
 import br.com.ant.system.action.ColoniaFormigasActionInterface;
 import br.com.ant.system.algoritmo.ASAlgoritmo;
@@ -41,7 +54,10 @@ import br.com.ant.system.notificacao.Notificacao.NotificacaoEnum;
 import br.com.ant.system.notificacao.NotificationController;
 import br.com.ant.system.util.AntSystemUtil;
 import br.com.ant.system.util.ImportarArquivoCidades;
+import br.com.ant.system.view.util.NumberField;
 
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.swing.mxGraphComponent;
@@ -72,17 +88,55 @@ public class ColoniaFormigasView extends JFrame {
 
 	mxGraph							graph;
 
+	JPanel							applicationPanel;
+	JPanel							leftPanel;
+	JPanel							rightPanel;
+
+	JRadioButton					monothreadButton;
+	JRadioButton					multiThreadButton;
+	FileChooserUI					arquivoImportacao;
+
+	JLabel							iteracoesLabel;
+	NumberField						iteracoesField;
+
+	JButton							executeButton;
+
 	PercursoController				percurso;
 	ColoniaFormigasActionInterface	coloniaFormigaAction;
+
+	ASAlgoritmo						algoritmo;
 
 	Logger							logger					= Logger.getLogger(this.getClass());
 	NotificationImp					notificationImp;
 
 	public ColoniaFormigasView() {
 		notificationImp = new NotificationImp();
-
 		percurso = new PercursoController();
+		algoritmo = new ASAlgoritmo();
 
+		Set<Caminho> caminhos = ImportarArquivoCidades();
+		this.formigas = adicionarFormigas();
+
+		// Montar paines.
+		this.montarPaineis();
+
+		// Montando o grafo das cidades.
+		this.montarGrafo(caminhos, this.formigas);
+	}
+
+	private List<Formiga> adicionarFormigas() {
+		List<Formiga> formigas = new ArrayList<Formiga>();
+		for (int i = 0; i < percurso.getCidadesPercurso().size(); i++) {
+			Cidade atuaCidade = percurso.getCidadesPercurso().get(i);
+			Formiga formiga = new Formiga(i, atuaCidade);
+
+			formigas.add(formiga);
+		}
+
+		return formigas;
+	}
+
+	private Set<Caminho> ImportarArquivoCidades() {
 		ImportarArquivoCidades imp = new ImportarArquivoCidades();
 		final Set<Caminho> caminhos = imp.importarAquivo("c:/distancias.csv");
 
@@ -90,61 +144,66 @@ public class ColoniaFormigasView extends JFrame {
 			Caminho c = (Caminho) it.next();
 			percurso.addCaminho(c);
 		}
-
-		ASAlgoritmo algoritmo = new ASAlgoritmo();
-
-		List<Formiga> formigas = new ArrayList<Formiga>();
-		for (int i = 0; i < percurso.getCidadesPercurso().size(); i++) {
-			Cidade atuaCidade = percurso.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(1, 6));
-			Formiga formiga = new Formiga(i, atuaCidade);
-
-			formigas.add(formiga);
-		}
-
-		this.formigas = formigas;
-
-		// coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
-		coloniaFormigaAction = new ColoniaFormigaMultithread(percurso, algoritmo);
-
-		// Montando o grafo das cidades.
-		this.montarGrafo(caminhos, formigas);
-
-		this.execute();
+		return caminhos;
 	}
 
-	private void execute() {
-		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-			@Override
-			protected Void doInBackground() throws Exception {
-				coloniaFormigaAction.setMaximoIteracoes(10);
+	private void montarPaineis() {
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		GridBagConstraints gbc = new GridBagConstraints();
+		applicationPanel = new JPanel(gridBagLayout);
 
-				if (coloniaFormigaAction instanceof ColoniaFormigaMultithread) {
-					ColoniaFormigaMultithread multiThread = (ColoniaFormigaMultithread) coloniaFormigaAction;
-					for (Formiga formiga : formigas) {
-						multiThread.addFormiga(formiga);
-					}
-				}
+		this.getContentPane().add(applicationPanel);
 
-				coloniaFormigaAction.action();
-				return null;
-			}
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.weighty = 1;
+		gbc.weightx = 1;
+		gbc.gridheight = GridBagConstraints.RELATIVE;
+		gbc.gridwidth = GridBagConstraints.RELATIVE;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.anchor = GridBagConstraints.LINE_START;
 
-			@Override
-			protected void done() {
-				try {
-					get();
-					JOptionPane.showMessageDialog(null, "Finalizado com sucesso.");
-				} catch (Exception e) {
-					logger.error("Houve um erro na execucao do algoritmo", e);
-					JOptionPane.showMessageDialog(null, "Houve um erro na execucao do algoritmo.");
-				}
-			}
-		};
-		worker.execute();
+		leftPanel = new JPanel(new GridBagLayout());
+		leftPanel.setBorder(BorderFactory.createTitledBorder("Grafico"));
+		applicationPanel.add(leftPanel, gbc);
+
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		gbc.weighty = 1.0;
+		gbc.weightx = 0.7;
+		gbc.gridheight = GridBagConstraints.REMAINDER;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.anchor = GridBagConstraints.LINE_END;
+
+		FormLayout layout = new FormLayout("$lcgap, left:p, $lcgap, p:grow, $lcgap", "$lg, p,$lg, p,$lg, p,$lg, p,$lg, p,$lg, p,$lg, p, $lg, p, $lg, p, B:p:grow");
+		CellConstraints cc = new CellConstraints();
+		rightPanel = new JPanel(layout);
+		rightPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.blue));
+
+		iteracoesLabel = new JLabel("Num. Iteracoes: ");
+		iteracoesField = new NumberField();
+
+		monothreadButton = new JRadioButton("MonoThread", true);
+		multiThreadButton = new JRadioButton("MultiThread");
+
+		ButtonGroup group = new ButtonGroup();
+		group.add(monothreadButton);
+		group.add(multiThreadButton);
+
+		executeButton = new JButton(new ExecutarAction());
+		rightPanel.add(monothreadButton, cc.xy(2, 2));
+		rightPanel.add(multiThreadButton, cc.xy(4, 2));
+		rightPanel.add(iteracoesLabel, cc.xy(2, 6));
+		rightPanel.add(iteracoesField, cc.xy(4, 6));
+		// rightPanel.add(arquivoImportacao, cc.xyw(2, 8, 2));
+		rightPanel.add(executeButton, cc.xy(4, 19));
+
+		applicationPanel.add(rightPanel, gbc);
 	}
 
 	private void montarGrafo(Collection<Caminho> caminhos, List<Formiga> formigas) {
 		graph = new mxGraph();
+
 		graph.setKeepEdgesInBackground(true);
 		graph.setCellsLocked(true);
 
@@ -167,7 +226,17 @@ public class ColoniaFormigasView extends JFrame {
 		}
 
 		mxGraphComponent graphComponent = new mxGraphComponent(graph);
-		getContentPane().add(graphComponent);
+
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.weighty = 1.0;
+		gbc.weightx = 0.5;
+		gbc.gridheight = GridBagConstraints.REMAINDER;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.anchor = GridBagConstraints.LINE_END;
+
+		leftPanel.add(graphComponent, gbc);
 	}
 
 	private void addEdge(Object parent, Caminho c) {
@@ -299,6 +368,82 @@ public class ColoniaFormigasView extends JFrame {
 				}
 			}
 		}
+	}
+
+	public class ExecutarAction extends AbstractAction {
+		private static final long	serialVersionUID	= 182237609101003562L;
+
+		public ExecutarAction() {
+			super("Executar");
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (multiThreadButton.isSelected()) {
+				this.executeMultiThread();
+			} else if (monothreadButton.isSelected()) {
+				this.executeMonoThread();
+			}
+		}
+
+		private void executeMultiThread() {
+			SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+				@Override
+				protected Void doInBackground() throws Exception {
+					coloniaFormigaAction = new ColoniaFormigaMultithread(percurso, algoritmo);
+					coloniaFormigaAction.setMaximoIteracoes(Integer.parseInt(iteracoesField.getText()));
+
+					if (coloniaFormigaAction instanceof ColoniaFormigaMultithread) {
+						ColoniaFormigaMultithread multiThread = (ColoniaFormigaMultithread) coloniaFormigaAction;
+
+						multiThread.action();
+
+						for (Formiga formiga : formigas) {
+							multiThread.addFormiga(formiga);
+						}
+					}
+
+					return null;
+				}
+
+				@Override
+				protected void done() {
+					try {
+						get();
+					} catch (Exception e) {
+						logger.error("Houve um erro na execucao do algoritmo", e);
+						JOptionPane.showMessageDialog(null, "Houve um erro na execucao do algoritmo.");
+					}
+				}
+			};
+			worker.execute();
+		}
+
+		private void executeMonoThread() {
+			SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+				@Override
+				protected Void doInBackground() throws Exception {
+					coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
+					coloniaFormigaAction.setMaximoIteracoes(Integer.parseInt(iteracoesField.getText()));
+
+					coloniaFormigaAction.action();
+
+					return null;
+				}
+
+				@Override
+				protected void done() {
+					try {
+						get();
+					} catch (Exception e) {
+						logger.error("Houve um erro na execucao do algoritmo", e);
+						JOptionPane.showMessageDialog(null, "Houve um erro na execucao do algoritmo.");
+					}
+				}
+			};
+			worker.execute();
+		}
+
 	}
 
 }

@@ -14,16 +14,10 @@
  */
 package br.com.ant.system.action;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import org.apache.log4j.Logger;
-
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Formiga;
 import br.com.ant.system.multithread.controller.ControladorGeral;
-import br.com.ant.system.multithread.controller.SimpleThreadFactory;
 
 /**
  * 
@@ -32,15 +26,11 @@ import br.com.ant.system.multithread.controller.SimpleThreadFactory;
  */
 public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface {
 
-	private int					maximoIteracoes;
 	private PercursoController	percurso;
-
 	private ASAlgoritmo			algoritmo;
 
-	private ExecutorService		executor	= Executors.newCachedThreadPool(new SimpleThreadFactory());
-
-	private Logger				logger		= Logger.getLogger(this.getClass());
 	private ControladorGeral	control;
+	private int					maximoIteracoes;
 
 	public ColoniaFormigaMultithread(PercursoController percursoController, ASAlgoritmo algoritmo) {
 		this.percurso = percursoController;
@@ -51,18 +41,22 @@ public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface
 
 	@Override
 	public void action() {
-		control = new ControladorGeral(algoritmo, percurso, maximoIteracoes);
-		executor.execute(control);
+		control = new ControladorGeral(algoritmo, percurso);
+		control.setMaximoIteracoes(maximoIteracoes);
+
+		Thread controlThread = new Thread(control);
+		controlThread.setName("ControladorThread");
+
+		controlThread.start();
 	}
 
-	@Override
 	public void setMaximoIteracoes(int maximo) {
 		this.maximoIteracoes = maximo;
 	}
 
 	@Override
 	public int getMaximoIteracoes() {
-		return this.maximoIteracoes;
+		return maximoIteracoes;
 	}
 
 	public void addFormiga(Formiga formiga) {

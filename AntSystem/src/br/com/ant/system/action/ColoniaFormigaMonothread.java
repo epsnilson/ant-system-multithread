@@ -15,6 +15,7 @@
 package br.com.ant.system.action;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -35,7 +36,7 @@ import br.com.ant.system.model.Formiga;
 public class ColoniaFormigaMonothread implements ColoniaFormigasActionInterface {
 
 	private int						maximoIteracoes;
-	private List<FormigaController>	formigas;
+	private List<FormigaController>	formigas		= new ArrayList<FormigaController>();
 	private Logger					logger			= Logger.getLogger(this.getClass());
 	private PercursoController		percursoController;
 	private FeromonioController		feromonioController;
