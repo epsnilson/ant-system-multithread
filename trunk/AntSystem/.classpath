@@ -5,5 +5,7 @@
 	<classpathentry kind="lib" path="lib/commons/commons-lang-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/log4j/log4j-1.2.9.jar"/>
 	<classpathentry kind="lib" path="lib/jgraph/jgraphx.jar"/>
+	<classpathentry kind="lib" path="lib/jgoodies/binding-2.0.5.jar"/>
+	<classpathentry kind="lib" path="lib/jgoodies/forms-1.2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
