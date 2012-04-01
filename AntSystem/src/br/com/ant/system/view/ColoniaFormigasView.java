@@ -292,8 +292,7 @@ public class ColoniaFormigasView extends JFrame {
 		graph.getModel().beginUpdate();
 
 		try {
-			graph.selectAll();
-			graph.removeCells(graph.getSelectionCells());
+			graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
 
 			for (Caminho c : percurso.getCaminhosDisponiveis()) {
 				this.addVertexCidade(parent, c.getCidadeOrigem());
@@ -433,19 +432,23 @@ public class ColoniaFormigasView extends JFrame {
 				Notificacao notificacao = NotificationController.getInstance().takeNotificacao();
 				Object obj = notificacao.getObj();
 
-				if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.CAMINHO)) {
+				execute(notificacao, obj);
+			}
+		}
 
-					Caminho c = (Caminho) obj;
-					updateEdge(c);
-				} else if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.FORMIGA)) {
-					Formiga formiga = (Formiga) obj;
+		private void execute(Notificacao notificacao, Object obj) {
+			if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.CAMINHO)) {
 
-					updateVertexFormiga(formiga);
-				} else if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.FEROMONIO)) {
-					Caminho c = (Caminho) obj;
+				Caminho c = (Caminho) obj;
+				updateEdge(c);
+			} else if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.FORMIGA)) {
+				Formiga formiga = (Formiga) obj;
 
-					updateEdgeFeromonio(c);
-				}
+				updateVertexFormiga(formiga);
+			} else if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.FEROMONIO)) {
+				Caminho c = (Caminho) obj;
+
+				updateEdgeFeromonio(c);
 			}
 		}
 	}
