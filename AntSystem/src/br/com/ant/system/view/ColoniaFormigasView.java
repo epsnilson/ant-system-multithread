@@ -14,7 +14,6 @@
  */
 package br.com.ant.system.view;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -37,8 +36,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SwingWorker;
-import javax.swing.plaf.FileChooserUI;
 
 import org.apache.log4j.Logger;
 
@@ -88,18 +88,22 @@ public class ColoniaFormigasView extends JFrame {
 	List<Formiga>					formigas;
 
 	mxGraph							graph;
+	mxGraphComponent				graphComponent;
 
 	JPanel							applicationPanel;
 	JPanel							leftPanel;
-	JPanel							rightPanel;
+	JPanel							rightTopPanel;
+	JPanel							rightFooterPanel;
 
 	JRadioButton					monothreadButton;
 	JRadioButton					multiThreadButton;
-	JFileChooser					arquivoImportacao;
 
 	JLabel							iteracoesLabel;
 	NumberField						iteracoesField;
+	JTextField						caminhoArquivoField;
+	JTextArea						consoleField;
 
+	JButton							buscarArquivoButton;
 	JButton							executeButton;
 
 	PercursoController				percurso;
@@ -115,14 +119,8 @@ public class ColoniaFormigasView extends JFrame {
 		percurso = new PercursoController();
 		algoritmo = new ASAlgoritmo();
 
-		Set<Caminho> caminhos = ImportarArquivoCidades();
-		this.formigas = adicionarFormigas();
-
 		// Montar paines.
 		this.montarPaineis();
-
-		// Montando o grafo das cidades.
-		this.montarGrafo(caminhos, this.formigas);
 	}
 
 	private List<Formiga> adicionarFormigas() {
@@ -137,14 +135,10 @@ public class ColoniaFormigasView extends JFrame {
 		return formigas;
 	}
 
-	private Set<Caminho> ImportarArquivoCidades() {
+	private Set<Caminho> ImportarArquivoCidades(String pathArquivo) {
 		ImportarArquivoCidades imp = new ImportarArquivoCidades();
-		final Set<Caminho> caminhos = imp.importarAquivo("c:/distancias.csv");
+		final Set<Caminho> caminhos = imp.importarAquivo(pathArquivo);
 
-		for (Iterator<Caminho> it = caminhos.iterator(); it.hasNext();) {
-			Caminho c = (Caminho) it.next();
-			percurso.addCaminho(c);
-		}
 		return caminhos;
 	}
 
@@ -158,69 +152,149 @@ public class ColoniaFormigasView extends JFrame {
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.weighty = 1;
-		gbc.weightx = 1;
-		gbc.gridheight = GridBagConstraints.RELATIVE;
+		gbc.weightx = 0.7;
+		gbc.gridheight = GridBagConstraints.REMAINDER;
 		gbc.gridwidth = GridBagConstraints.RELATIVE;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.LINE_START;
 
 		leftPanel = new JPanel(new GridBagLayout());
 		leftPanel.setBorder(BorderFactory.createTitledBorder("Grafico"));
+
+		graph = new mxGraph();
+		graphComponent = new mxGraphComponent(graph);
+		graph.setKeepEdgesInBackground(true);
+		graph.setCellsLocked(true);
+
+		GridBagConstraints gbc1 = new GridBagConstraints();
+		gbc1.gridx = 0;
+		gbc1.gridy = 0;
+		gbc1.weighty = 1.0;
+		gbc1.weightx = 1.0;
+		gbc1.gridheight = GridBagConstraints.REMAINDER;
+		gbc1.fill = GridBagConstraints.BOTH;
+		gbc1.anchor = GridBagConstraints.LINE_START;
+		leftPanel.add(graphComponent, gbc1);
+
 		applicationPanel.add(leftPanel, gbc);
 
 		gbc.gridx = 1;
 		gbc.gridy = 0;
-		gbc.weighty = 1.0;
-		gbc.weightx = 0.7;
-		gbc.gridheight = GridBagConstraints.REMAINDER;
-		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weighty = 0.3;
+		gbc.weightx = 0.3;
+		gbc.gridheight = GridBagConstraints.RELATIVE;
 		gbc.anchor = GridBagConstraints.LINE_END;
 
-		FormLayout layout = new FormLayout("$lcgap, left:p, $lcgap, p:grow, $lcgap", "$lg, p,$lg, p,$lg, p,$lg, p,$lg, p,$lg, p,$lg, p, $lg, p, $lg, p, B:p:grow");
+		rightTopPanel = this.montarRightTopPainel();
+		applicationPanel.add(rightTopPanel, gbc);
+
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		gbc.weighty = 0.7;
+		gbc.weightx = 0.3;
+		gbc.gridheight = GridBagConstraints.REMAINDER;
+		gbc.anchor = GridBagConstraints.LINE_END;
+
+		rightFooterPanel = this.montarRightFooterPanel();
+		applicationPanel.add(rightFooterPanel, gbc);
+
+	}
+
+	private JPanel montarRightFooterPanel() {
+		GridBagConstraints gbc1 = new GridBagConstraints();
+		JPanel rightFooterPanel = new JPanel(new GridBagLayout());
+		rightFooterPanel.setBorder(BorderFactory.createTitledBorder("Console"));
+
+		gbc1.gridx = 0;
+		gbc1.gridy = 0;
+		gbc1.weighty = 1;
+		gbc1.weightx = 1;
+		gbc1.gridheight = GridBagConstraints.REMAINDER;
+		gbc1.gridwidth = GridBagConstraints.REMAINDER;
+		gbc1.fill = GridBagConstraints.BOTH;
+		gbc1.anchor = GridBagConstraints.LINE_START;
+
+		consoleField = new JTextArea();
+		consoleField.setEditable(false);
+		consoleField.setWrapStyleWord(true);
+
+		rightFooterPanel.add(consoleField, gbc1);
+		return rightFooterPanel;
+	}
+
+	private JPanel montarRightTopPainel() {
+		FormLayout layout = new FormLayout("$lcgap, left:p,  $lcgap, p:grow, $lcgap", "$lg, p,$lg, p,$lg, p,$lg, p,$lg, p");
 		CellConstraints cc = new CellConstraints();
-		rightPanel = new JPanel(layout);
-		rightPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.blue));
+
+		JPanel rightTopPanel = new JPanel(layout);
+		rightTopPanel.setBorder(BorderFactory.createTitledBorder("Opções:"));
 
 		iteracoesLabel = new JLabel("Num. Iteracoes: ");
 		iteracoesField = new NumberField();
+		iteracoesField.setText("5");
 
 		monothreadButton = new JRadioButton("MonoThread", true);
 		multiThreadButton = new JRadioButton("MultiThread");
 
-		JFileChooser chooser = new JFileChooser();
-		chooser.showOpenDialog(null);
-
-//		jtfCaminho.setText(chooser.getSelectedFile().getAbsolutePath());
-//		CaminhoArq = chooser.getSelectedFile().getAbsolutePath();
-//		if (CaminhoArq != null) {
-//			jbtnImportar.setEnabled(true);
-//		}
-
+		JPanel panelGroup = new JPanel();
 		ButtonGroup group = new ButtonGroup();
 		group.add(monothreadButton);
 		group.add(multiThreadButton);
 
-		executeButton = new JButton(new ExecutarAction());
-		rightPanel.add(monothreadButton, cc.xy(2, 2));
-		rightPanel.add(multiThreadButton, cc.xy(4, 2));
-		rightPanel.add(iteracoesLabel, cc.xy(2, 6));
-		rightPanel.add(iteracoesField, cc.xy(4, 6));
-		// rightPanel.add(arquivoImportacao, cc.xyw(2, 8, 2));
-		rightPanel.add(executeButton, cc.xy(4, 19));
+		panelGroup.add(monothreadButton);
+		panelGroup.add(multiThreadButton);
 
-		applicationPanel.add(rightPanel, gbc);
+		JPanel panelArquivo = new JPanel(new GridBagLayout());
+		panelArquivo.setBorder(BorderFactory.createTitledBorder("Arquivo de cidades"));
+		GridBagConstraints gbc = new GridBagConstraints();
+
+		caminhoArquivoField = new JTextField();
+		caminhoArquivoField.setEnabled(false);
+		caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
+
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.weighty = 1;
+		gbc.weightx = 0.9;
+		gbc.gridheight = GridBagConstraints.REMAINDER;
+		gbc.gridwidth = GridBagConstraints.RELATIVE;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.anchor = GridBagConstraints.LINE_START;
+
+		panelArquivo.add(caminhoArquivoField, gbc);
+
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		gbc.weighty = 1;
+		gbc.weightx = 0.1;
+		gbc.gridheight = GridBagConstraints.REMAINDER;
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.anchor = GridBagConstraints.LINE_END;
+		buscarArquivoButton = new JButton(new BuscarArquivoAction());
+
+		panelArquivo.add(buscarArquivoButton, gbc);
+
+		executeButton = new JButton(new ExecutarAction());
+		rightTopPanel.add(panelGroup, cc.xyw(2, 2, 4));
+		rightTopPanel.add(iteracoesLabel, cc.xy(2, 4));
+		rightTopPanel.add(iteracoesField, cc.xy(4, 4));
+		rightTopPanel.add(panelArquivo, cc.xyw(2, 6, 4));
+		rightTopPanel.add(executeButton, cc.xyw(2, 10, 3));
+
+		return rightTopPanel;
 	}
 
 	private void montarGrafo(Collection<Caminho> caminhos, List<Formiga> formigas) {
-		graph = new mxGraph();
-
-		graph.setKeepEdgesInBackground(true);
-		graph.setCellsLocked(true);
-
+		NotificationController.getInstance().clearNotification();
 		Object parent = graph.getDefaultParent();
+
 		graph.getModel().beginUpdate();
 
 		try {
+			graph.selectAll();
+			graph.removeCells(graph.getSelectionCells());
+
 			for (Caminho c : percurso.getCaminhosDisponiveis()) {
 				this.addVertexCidade(parent, c.getCidadeOrigem());
 				this.addVertexCidade(parent, c.getCidadeDestino());
@@ -235,18 +309,8 @@ public class ColoniaFormigasView extends JFrame {
 			graph.getModel().endUpdate();
 		}
 
-		mxGraphComponent graphComponent = new mxGraphComponent(graph);
-
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		gbc.weighty = 1.0;
-		gbc.weightx = 0.5;
-		gbc.gridheight = GridBagConstraints.REMAINDER;
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.anchor = GridBagConstraints.LINE_END;
-
-		leftPanel.add(graphComponent, gbc);
+		graphComponent.repaint();
+		leftPanel.repaint();
 	}
 
 	private void addEdge(Object parent, Caminho c) {
@@ -258,7 +322,7 @@ public class ColoniaFormigasView extends JFrame {
 
 			mxCell obj = (mxCell) graph.insertEdge(parent, null, null, origem, destino, style);
 
-			// obj.setVisible(false);
+			obj.setVisible(false);
 			mapEdge.put(c, obj);
 		}
 	}
@@ -289,7 +353,7 @@ public class ColoniaFormigasView extends JFrame {
 		}
 	}
 
-	public void updateVertexFormiga(final Formiga f) {
+	public void updateVertexFormiga(Formiga f) {
 		mxCell cell = (mxCell) mapVertexFormiga.get(f.getId());
 		try {
 			graph.getModel().beginUpdate();
@@ -319,7 +383,7 @@ public class ColoniaFormigasView extends JFrame {
 		// }
 	}
 
-	public void updateEdgeFeromonio(final Caminho c) {
+	public void updateEdgeFeromonio(Caminho c) {
 		mxCell cell = (mxCell) mapEdge.get(c);
 		try {
 			graph.getModel().beginUpdate();
@@ -351,9 +415,15 @@ public class ColoniaFormigasView extends JFrame {
 
 	}
 
+	public void addConsoleText(String text) {
+		consoleField.setText(consoleField.getText() + text + "\n");
+	}
+
 	public class NotificationImp implements Runnable {
 		private NotificationImp() {
 			Thread thread = new Thread(this);
+			thread.setName("NotificationGrafo");
+			thread.setPriority(Thread.MAX_PRIORITY);
 			thread.start();
 		}
 
@@ -389,69 +459,100 @@ public class ColoniaFormigasView extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (multiThreadButton.isSelected()) {
-				this.executeMultiThread();
-			} else if (monothreadButton.isSelected()) {
-				this.executeMonoThread();
-			}
+
+			SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+				@Override
+				protected Void doInBackground() throws Exception {
+					executeButton.setEnabled(false);
+
+					addConsoleText("Iniciando a execução do algoritmo...");
+					long inicial = System.currentTimeMillis();
+
+					caminhos = ImportarArquivoCidades(caminhoArquivoField.getText());
+
+					for (Iterator<Caminho> it = caminhos.iterator(); it.hasNext();) {
+						Caminho c = (Caminho) it.next();
+						percurso.addCaminho(c);
+					}
+					formigas = adicionarFormigas();
+
+					// Montando o grafo das cidades.
+					montarGrafo(caminhos, formigas);
+
+					if (multiThreadButton.isSelected()) {
+						executeMultiThread();
+					} else if (monothreadButton.isSelected()) {
+						executeMonoThread();
+					}
+
+					long fim = System.currentTimeMillis();
+					addConsoleText("Algoritmo finalizado...");
+					addConsoleText("Tempo Gasto: " + (fim - inicial));
+
+					return null;
+				}
+
+				@Override
+				protected void done() {
+					try {
+						get();
+						executeButton.setEnabled(true);
+					} catch (Exception e) {
+						logger.error("Houve um erro na execucao do algoritmo", e);
+						JOptionPane.showMessageDialog(null, e.getMessage());
+					}
+				}
+			};
+			worker.execute();
 		}
 
 		private void executeMultiThread() {
-			SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-				@Override
-				protected Void doInBackground() throws Exception {
-					coloniaFormigaAction = new ColoniaFormigaMultithread(percurso, algoritmo);
-					coloniaFormigaAction.setMaximoIteracoes(Integer.parseInt(iteracoesField.getText()));
+			coloniaFormigaAction = new ColoniaFormigaMultithread(percurso, algoritmo);
+			coloniaFormigaAction.setMaximoIteracoes(Integer.parseInt(iteracoesField.getText()));
 
-					if (coloniaFormigaAction instanceof ColoniaFormigaMultithread) {
-						ColoniaFormigaMultithread multiThread = (ColoniaFormigaMultithread) coloniaFormigaAction;
+			if (coloniaFormigaAction instanceof ColoniaFormigaMultithread) {
+				ColoniaFormigaMultithread multiThread = (ColoniaFormigaMultithread) coloniaFormigaAction;
 
-						multiThread.action();
+				multiThread.action();
 
-						for (Formiga formiga : formigas) {
-							multiThread.addFormiga(formiga);
-						}
-					}
-
-					return null;
+				for (Formiga formiga : formigas) {
+					multiThread.addFormiga(formiga);
 				}
 
-				@Override
-				protected void done() {
+				while (!multiThread.isDone()) {
 					try {
-						get();
-					} catch (Exception e) {
-						logger.error("Houve um erro na execucao do algoritmo", e);
-						JOptionPane.showMessageDialog(null, "Houve um erro na execucao do algoritmo.");
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
 					}
 				}
-			};
-			worker.execute();
+			}
+
 		}
 
 		private void executeMonoThread() {
-			SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-				@Override
-				protected Void doInBackground() throws Exception {
-					coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
-					coloniaFormigaAction.setMaximoIteracoes(Integer.parseInt(iteracoesField.getText()));
+			coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
+			coloniaFormigaAction.setMaximoIteracoes(Integer.parseInt(iteracoesField.getText()));
 
-					coloniaFormigaAction.action();
+			coloniaFormigaAction.action();
+		}
 
-					return null;
-				}
+	}
 
-				@Override
-				protected void done() {
-					try {
-						get();
-					} catch (Exception e) {
-						logger.error("Houve um erro na execucao do algoritmo", e);
-						JOptionPane.showMessageDialog(null, "Houve um erro na execucao do algoritmo.");
-					}
-				}
-			};
-			worker.execute();
+	public class BuscarArquivoAction extends AbstractAction {
+
+		private static final long	serialVersionUID	= 1L;
+
+		public BuscarArquivoAction() {
+			super("Escolher");
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			JFileChooser chooser = new JFileChooser(System.getenv("user.dir"));
+			chooser.showOpenDialog(null);
+
+			caminhoArquivoField.setText(chooser.getSelectedFile().getAbsolutePath());
+
 		}
 
 	}
