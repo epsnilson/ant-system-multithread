@@ -14,8 +14,11 @@
  */
 package br.com.ant.system.action;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import org.apache.log4j.Logger;
 
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.PercursoController;
@@ -38,11 +41,17 @@ public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface
 	@SuppressWarnings("rawtypes")
 	Future						controlFuture;
 
-	public ColoniaFormigaMultithread(PercursoController percursoController, ASAlgoritmo algoritmo) {
-		this.percurso = percursoController;
+	Logger						logger	= Logger.getLogger(this.getClass());
+
+	public ColoniaFormigaMultithread(PercursoController percurso, ASAlgoritmo algoritmo) {
 		this.algoritmo = algoritmo;
+		this.percurso = percurso;
 
 		algoritmo.inicializarFeromonio(percurso.getCaminhosDisponiveis(), percurso.getCidadesPercurso().size());
+	}
+
+	public void setPercurso(PercursoController percurso) {
+
 	}
 
 	@Override
@@ -69,8 +78,14 @@ public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface
 	public void waitForEnd() {
 		try {
 			controlFuture.get();
-		} catch (Exception e) {
+		} catch (InterruptedException e) {
+			logger.info("A Thread de controle foi interrompida.");
+		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public void clear() {
+		control.clear();
 	}
 }

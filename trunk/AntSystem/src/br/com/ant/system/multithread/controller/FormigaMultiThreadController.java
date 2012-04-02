@@ -16,9 +16,15 @@ public class FormigaMultiThreadController {
 	}
 
 	public Formiga call() {
+		// Setando o tempo inicial
+		formigaController.getFormiga().setTempoInicial(System.currentTimeMillis());
+
 		do {
 			formigaController.escolherPercurso();
 		} while (!percurso.isFinalizouPercurso(formigaController.getFormiga()));
+
+		// Setando o tempo Final
+		formigaController.getFormiga().setTempoFinal(System.currentTimeMillis());
 
 		return formigaController.getFormiga();
 	}
