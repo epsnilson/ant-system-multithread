@@ -331,7 +331,7 @@ public class ColoniaFormigasView extends JFrame {
 
 			mxCell obj = (mxCell) graph.insertEdge(parent, null, null, origem, destino, style);
 
-			// obj.setVisible(false);
+			 obj.setVisible(false);
 			mapEdge.put(c, obj);
 		}
 	}
