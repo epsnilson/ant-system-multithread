@@ -13,6 +13,7 @@ public class SimpleThreadFactory implements ThreadFactory {
 
 		poolNumber.set(poolNumber.get() + 1);
 		thread.setName("MultiThreadFormigas " + poolNumber.get());
+		thread.setPriority(Thread.MAX_PRIORITY);
 
 		return thread;
 	}

@@ -62,7 +62,7 @@ public class ColoniaFormigaMonothread implements ColoniaFormigasActionInterface 
 		logger.info("Iniciando a execução do Algoritmo...");
 		logger.info("Maximo Interacoes: " + maximoIteracoes);
 		logger.info("Quantidade de formigas: " + formigas.size());
-		logger.info("Quantidade de cidades: " + percursoController.getCidadesPercurso());
+		logger.info("Quantidade de cidades: " + percursoController.getCidadesPercurso().size());
 
 		EstatisticasControler.getInstance().setNumeroIteracoes(maximoIteracoes);
 		EstatisticasControler.getInstance().setHorarioInicial(System.currentTimeMillis());

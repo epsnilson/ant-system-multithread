@@ -28,7 +28,7 @@ public class ControladorGeral implements Runnable {
 	private Set<Formiga>		formigasDisponiveis	= new HashSet<Formiga>();
 	private Set<Formiga>		formigasFinalizadas	= new HashSet<Formiga>();
 
-	private ExecutorService		executor			= Executors.newCachedThreadPool(new SimpleThreadFactory());
+	private ExecutorService		executor			= Executors.newFixedThreadPool(3, new SimpleThreadFactory());
 
 	private Logger				logger				= Logger.getLogger(this.getClass());
 
@@ -46,6 +46,10 @@ public class ControladorGeral implements Runnable {
 
 		this.buffer = new BufferBlockingClass();
 
+	}
+
+	public void setPercurso(PercursoController percurso) {
+		this.percurso = percurso;
 	}
 
 	@Override
@@ -69,8 +73,6 @@ public class ControladorGeral implements Runnable {
 		auxServicesFuture.cancel(true);
 		formigaExecutionFuture.cancel(true);
 
-		while (!formigaExecutionFuture.isDone() && !auxServicesFuture.isDone()) {
-		}
 	}
 
 	public void addFormiga(Formiga formiga) {
@@ -99,24 +101,29 @@ public class ControladorGeral implements Runnable {
 		public void run() {
 			while (true) {
 				try {
-					lock.lock();
 					Formiga formiga = buffer.takeFormigaExecution();
-					formigasDisponiveis.add(formiga);
 
-					// executando a thread
-					if (formiga.getQntIteracaoExecutadas() < maximoIteracoes.get()) {
-						executor.submit(new MultiThreadDispatched(formiga, percurso, algoritmo, buffer));
-					} else {
-						formigasFinalizadas.add(formiga);
+					try {
+						lock.lock();
+						formigasDisponiveis.add(formiga);
 
-						if (formigasDisponiveis.size() == formigasFinalizadas.size()) {
-							canContinue.signal();
+						// executando a thread
+						if (formiga.getQntIteracaoExecutadas() < maximoIteracoes.get()) {
+							executor.submit(new MultiThreadDispatched(formiga, percurso, algoritmo, buffer));
+						} else {
+							formigasFinalizadas.add(formiga);
+
+							if (formigasDisponiveis.size() == formigasFinalizadas.size()) {
+								logger.info("Todas as formigas finalizaram o percurso.");
+								canContinue.signal();
+							}
 						}
+					} finally {
+						lock.unlock();
 					}
+
 				} catch (InterruptedException e) {
 					logger.info("Thread de execucao de formigas foi interrompida.");
-				} finally {
-					lock.unlock();
 				}
 			}
 		}
@@ -128,5 +135,10 @@ public class ControladorGeral implements Runnable {
 
 	public int getMaximoIteracoes() {
 		return maximoIteracoes.get();
+	}
+
+	public void clear() {
+		formigasDisponiveis.clear();
+		formigasFinalizadas.clear();
 	}
 }

@@ -151,13 +151,40 @@ public class ColoniaFormigasView extends JFrame {
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.weighty = 1;
-		gbc.weightx = 0.7;
+		gbc.weightx = 0.9;
 		gbc.gridheight = GridBagConstraints.REMAINDER;
 		gbc.gridwidth = GridBagConstraints.RELATIVE;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.LINE_START;
 
-		leftPanel = new JPanel(new GridBagLayout());
+		leftPanel = this.montarLeftPanel();
+
+		applicationPanel.add(leftPanel, gbc);
+
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		gbc.weighty = 0.3;
+		gbc.weightx = 0.1;
+		gbc.gridheight = GridBagConstraints.RELATIVE;
+		gbc.anchor = GridBagConstraints.LINE_END;
+
+		rightTopPanel = this.montarRightTopPainel();
+		applicationPanel.add(rightTopPanel, gbc);
+
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		gbc.weighty = 0.7;
+		gbc.weightx = 0.1;
+		gbc.gridheight = GridBagConstraints.REMAINDER;
+		gbc.anchor = GridBagConstraints.LINE_END;
+
+		rightFooterPanel = this.montarRightFooterPanel();
+		applicationPanel.add(rightFooterPanel, gbc);
+
+	}
+
+	private JPanel montarLeftPanel() {
+		JPanel leftPanel = new JPanel(new GridBagLayout());
 		leftPanel.setBorder(BorderFactory.createTitledBorder("Grafico"));
 
 		graph = new mxGraph();
@@ -175,28 +202,7 @@ public class ColoniaFormigasView extends JFrame {
 		gbc1.anchor = GridBagConstraints.LINE_START;
 		leftPanel.add(graphComponent, gbc1);
 
-		applicationPanel.add(leftPanel, gbc);
-
-		gbc.gridx = 1;
-		gbc.gridy = 0;
-		gbc.weighty = 0.3;
-		gbc.weightx = 0.3;
-		gbc.gridheight = GridBagConstraints.RELATIVE;
-		gbc.anchor = GridBagConstraints.LINE_END;
-
-		rightTopPanel = this.montarRightTopPainel();
-		applicationPanel.add(rightTopPanel, gbc);
-
-		gbc.gridx = 1;
-		gbc.gridy = 1;
-		gbc.weighty = 0.7;
-		gbc.weightx = 0.3;
-		gbc.gridheight = GridBagConstraints.REMAINDER;
-		gbc.anchor = GridBagConstraints.LINE_END;
-
-		rightFooterPanel = this.montarRightFooterPanel();
-		applicationPanel.add(rightFooterPanel, gbc);
-
+		return leftPanel;
 	}
 
 	private JPanel montarRightFooterPanel() {
@@ -230,7 +236,7 @@ public class ColoniaFormigasView extends JFrame {
 
 		iteracoesLabel = new JLabel("Num. Iteracoes: ");
 		iteracoesField = new NumberField();
-		iteracoesField.setText("5");
+		iteracoesField.setText("99");
 
 		monothreadButton = new JRadioButton("MonoThread", true);
 		multiThreadButton = new JRadioButton("MultiThread");
@@ -249,7 +255,8 @@ public class ColoniaFormigasView extends JFrame {
 
 		caminhoArquivoField = new JTextField();
 		caminhoArquivoField.setEnabled(false);
-		caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
+		// caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
+		caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
 
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -324,7 +331,7 @@ public class ColoniaFormigasView extends JFrame {
 
 			mxCell obj = (mxCell) graph.insertEdge(parent, null, null, origem, destino, style);
 
-			obj.setVisible(false);
+			// obj.setVisible(false);
 			mapEdge.put(c, obj);
 		}
 	}
@@ -353,6 +360,7 @@ public class ColoniaFormigasView extends JFrame {
 			// String style =
 			// "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter;imageWidth=1000;imageHeight=1000;shape=image;image=file:"
 			// + imagemPath;
+
 			String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter";
 			Object obj = graph.insertVertex(parent, String.valueOf(f.getId()), String.valueOf(f.getId()), x, y, LENGHT_VERTEX_FORMIGA, LENGHT_VERTEX_FORMIGA, style);
 			mapVertexFormiga.put(f.getId(), obj);
@@ -378,19 +386,6 @@ public class ColoniaFormigasView extends JFrame {
 		}
 	}
 
-	public void updateEdge(final Caminho c) {
-		// mxCell cell = (mxCell) mapEdge.get(c);
-		// try {
-		// graph.getModel().beginUpdate();
-		// } finally {
-		// try {
-		// graph.getModel().endUpdate();
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		// }
-	}
-
 	public void updateEdgeFeromonio(Caminho c) {
 		mxCell cell = (mxCell) mapEdge.get(c);
 		try {
@@ -406,10 +401,7 @@ public class ColoniaFormigasView extends JFrame {
 
 			String style = EDGE_STYLE + color;
 
-			graph.getModel().remove(cell);
-			Object newCell = graph.insertEdge(cell.getParent(), null, null, cell.getSource(), cell.getTarget(), style);
-
-			mapEdge.put(c, newCell);
+			graph.getModel().setStyle(cell, style);
 
 			cell = null;
 
@@ -444,11 +436,7 @@ public class ColoniaFormigasView extends JFrame {
 		}
 
 		private void execute(Notificacao notificacao, Object obj) {
-			if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.CAMINHO)) {
-
-				Caminho c = (Caminho) obj;
-				updateEdge(c);
-			} else if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.FORMIGA)) {
+			if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.FORMIGA)) {
 				Formiga formiga = (Formiga) obj;
 
 				updateVertexFormiga(formiga);
@@ -508,6 +496,8 @@ public class ColoniaFormigasView extends JFrame {
 						get();
 						executeButton.setEnabled(true);
 					} catch (Exception e) {
+						executeButton.setEnabled(true);
+
 						logger.error("Houve um erro na execucao do algoritmo", e);
 						JOptionPane.showMessageDialog(null, e.getMessage());
 					}
@@ -531,8 +521,6 @@ public class ColoniaFormigasView extends JFrame {
 				}
 
 				multiThread.waitForEnd();
-
-				System.out.println("Passei aki..");
 			}
 
 		}
@@ -561,7 +549,6 @@ public class ColoniaFormigasView extends JFrame {
 			chooser.showOpenDialog(null);
 
 			caminhoArquivoField.setText(chooser.getSelectedFile().getAbsolutePath());
-
 		}
 
 	}
