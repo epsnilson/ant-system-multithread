@@ -12,7 +12,7 @@ public class SimpleThreadFactory implements ThreadFactory {
 		Thread thread = new Thread(r);
 
 		poolNumber.set(poolNumber.get() + 1);
-		thread.setName("Formigas" + poolNumber.get());
+		thread.setName("MultiThreadFormigas " + poolNumber.get());
 
 		return thread;
 	}

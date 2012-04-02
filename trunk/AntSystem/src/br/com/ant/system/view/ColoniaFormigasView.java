@@ -28,7 +28,6 @@ import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -74,8 +73,8 @@ public class ColoniaFormigasView extends JFrame {
 	private static final int		_Y						= 700;
 	private static final int		_X						= 900;
 	private static final long		serialVersionUID		= 1L;
-	private static final int		LENGHT_VERTEX_CIDADE	= 10;
-	private static final int		LENGHT_VERTEX_FORMIGA	= 50;
+	private static final int		LENGHT_VERTEX_CIDADE	= 30;
+	private static final int		LENGHT_VERTEX_FORMIGA	= 10;
 
 	private int						x						= 5;
 	private int						y						= 5;
@@ -289,6 +288,10 @@ public class ColoniaFormigasView extends JFrame {
 		NotificationController.getInstance().clearNotification();
 		Object parent = graph.getDefaultParent();
 
+		mapEdge.clear();
+		mapVertexCidade.clear();
+		mapVertexFormiga.clear();
+
 		graph.getModel().beginUpdate();
 
 		try {
@@ -340,13 +343,17 @@ public class ColoniaFormigasView extends JFrame {
 		if (!mapVertexFormiga.containsKey(f.getId())) {
 			mxCell cell = (mxCell) mapVertexCidade.get(f.getLocalizacaoCidadeInicial());
 
-			x = cell.getGeometry().getPoint().x;
-			y = cell.getGeometry().getPoint().y;
+			int x = cell.getGeometry().getPoint().x;
+			int y = cell.getGeometry().getPoint().y;
 
-			String pathJar = System.getProperty("user.dir");
-			ImageIcon imagemPath = new ImageIcon(pathJar + "\\resources\\imagens\\images.png");
+			// String pathJar = System.getProperty("user.dir");
+			// ImageIcon imagemPath = new ImageIcon(pathJar +
+			// "\\resources\\imagens\\images.png");
 
-			String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter;imageWidth=1000;imageHeight=1000;shape=image;image=file:" + imagemPath;
+			// String style =
+			// "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter;imageWidth=1000;imageHeight=1000;shape=image;image=file:"
+			// + imagemPath;
+			String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter";
 			Object obj = graph.insertVertex(parent, String.valueOf(f.getId()), String.valueOf(f.getId()), x, y, LENGHT_VERTEX_FORMIGA, LENGHT_VERTEX_FORMIGA, style);
 			mapVertexFormiga.put(f.getId(), obj);
 		}
@@ -364,6 +371,8 @@ public class ColoniaFormigasView extends JFrame {
 			geometry.setWidth(LENGHT_VERTEX_FORMIGA);
 
 			graph.getModel().setGeometry(cell, geometry);
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			graph.getModel().endUpdate();
 		}
@@ -404,12 +413,10 @@ public class ColoniaFormigasView extends JFrame {
 
 			cell = null;
 
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
-			try {
-				graph.getModel().endUpdate();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			graph.getModel().endUpdate();
 		}
 
 	}
@@ -468,9 +475,9 @@ public class ColoniaFormigasView extends JFrame {
 				protected Void doInBackground() throws Exception {
 					executeButton.setEnabled(false);
 
-					addConsoleText("Iniciando a execução do algoritmo...");
 					long inicial = System.currentTimeMillis();
 
+					addConsoleText("Importando o arquivos de cidades...");
 					caminhos = ImportarArquivoCidades(caminhoArquivoField.getText());
 
 					for (Iterator<Caminho> it = caminhos.iterator(); it.hasNext();) {
@@ -510,6 +517,7 @@ public class ColoniaFormigasView extends JFrame {
 		}
 
 		private void executeMultiThread() {
+			addConsoleText("Iniciando a execução do algoritmo em multiplas threads...");
 			coloniaFormigaAction = new ColoniaFormigaMultithread(percurso, algoritmo);
 			coloniaFormigaAction.setMaximoIteracoes(Integer.parseInt(iteracoesField.getText()));
 
@@ -522,17 +530,15 @@ public class ColoniaFormigasView extends JFrame {
 					multiThread.addFormiga(formiga);
 				}
 
-				while (!multiThread.isDone()) {
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-					}
-				}
+				multiThread.waitForEnd();
+
+				System.out.println("Passei aki..");
 			}
 
 		}
 
 		private void executeMonoThread() {
+			addConsoleText("Iniciando a execução do algoritmo em monothread...");
 			coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
 			coloniaFormigaAction.setMaximoIteracoes(Integer.parseInt(iteracoesField.getText()));
 
