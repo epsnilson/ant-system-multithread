@@ -91,6 +91,7 @@ public class Formiga implements Cloneable {
 
 		this.localizacaoCidadeAtual = localizacaoAtual;
 		this.localizacaoCidadeInicial = localizacaoAtual;
+		this.todasVisitadas = false;
 	}
 
 	public boolean isCidadeVisitada(Cidade cidade) {

@@ -29,44 +29,48 @@ import br.com.ant.system.multithread.controller.ControladorGeral;
  */
 public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface {
 
-		  private PercursoController percurso;
-		  private ASAlgoritmo		algoritmo;
+	private PercursoController	percurso;
+	private ASAlgoritmo			algoritmo;
 
-		  private ControladorGeral   control;
-		  private int				maximoIteracoes;
+	private ControladorGeral	control;
+	private int					maximoIteracoes;
 
-		  @SuppressWarnings("rawtypes")
-		  Future					 controlFuture;
+	@SuppressWarnings("rawtypes")
+	Future						controlFuture;
 
-		  public ColoniaFormigaMultithread(PercursoController percursoController, ASAlgoritmo algoritmo) {
-					this.percurso = percursoController;
-					this.algoritmo = algoritmo;
+	public ColoniaFormigaMultithread(PercursoController percursoController, ASAlgoritmo algoritmo) {
+		this.percurso = percursoController;
+		this.algoritmo = algoritmo;
 
-					algoritmo.inicializarFeromonio(percurso.getCaminhosDisponiveis(), percurso.getCidadesPercurso().size());
-		  }
+		algoritmo.inicializarFeromonio(percurso.getCaminhosDisponiveis(), percurso.getCidadesPercurso().size());
+	}
 
-		  @Override
-		  public void action() {
-					control = new ControladorGeral(algoritmo, percurso);
-					control.setMaximoIteracoes(maximoIteracoes);
+	@Override
+	public void action() {
+		control = new ControladorGeral(algoritmo, percurso);
+		control.setMaximoIteracoes(maximoIteracoes);
 
-					controlFuture = Executors.newFixedThreadPool(1).submit(control);
-		  }
+		controlFuture = Executors.newFixedThreadPool(1).submit(control);
+	}
 
-		  public void setMaximoIteracoes(int maximo) {
-					this.maximoIteracoes = maximo;
-		  }
+	public void setMaximoIteracoes(int maximo) {
+		this.maximoIteracoes = maximo;
+	}
 
-		  @Override
-		  public int getMaximoIteracoes() {
-					return maximoIteracoes;
-		  }
+	@Override
+	public int getMaximoIteracoes() {
+		return maximoIteracoes;
+	}
 
-		  public void addFormiga(Formiga formiga) {
-					control.addFormiga(formiga);
-		  }
+	public void addFormiga(Formiga formiga) {
+		control.addFormiga(formiga);
+	}
 
-		  public boolean isDone() {
-					return controlFuture.isDone();
-		  }
+	public void waitForEnd() {
+		try {
+			controlFuture.get();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 }
