@@ -7,5 +7,14 @@
 	<classpathentry kind="lib" path="lib/jgraph/jgraphx.jar"/>
 	<classpathentry kind="lib" path="lib/jgoodies/binding-2.0.5.jar"/>
 	<classpathentry kind="lib" path="lib/jgoodies/forms-1.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart/gnujaxp.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart/iText-2.1.5.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart/jcommon-1.0.17.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart/jfreechart-1.0.14.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart/jfreechart-1.0.14-experimental.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart/jfreechart-1.0.14-swt.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart/junit.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart/servlet.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart/swtgraphics2d.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
