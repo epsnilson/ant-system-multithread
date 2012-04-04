@@ -36,6 +36,5 @@ public class MultiThreadDispatched implements Callable<Formiga> {
 		}
 		
 		return formiga;
-
 	}
 }

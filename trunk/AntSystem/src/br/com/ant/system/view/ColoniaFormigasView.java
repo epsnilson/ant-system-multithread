@@ -14,9 +14,12 @@
  */
 package br.com.ant.system.view;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,6 +31,7 @@ import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -40,14 +44,23 @@ import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
 import org.apache.log4j.Logger;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import br.com.ant.system.action.ColoniaFormigaMonothread;
 import br.com.ant.system.action.ColoniaFormigaMultithread;
 import br.com.ant.system.action.ColoniaFormigasActionInterface;
 import br.com.ant.system.algoritmo.ASAlgoritmo;
+import br.com.ant.system.controller.EstatisticasControler;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
+import br.com.ant.system.model.Estatistica;
 import br.com.ant.system.model.Formiga;
 import br.com.ant.system.notificacao.Notificacao;
 import br.com.ant.system.notificacao.Notificacao.NotificacaoEnum;
@@ -73,8 +86,8 @@ public class ColoniaFormigasView extends JFrame {
 	private static final int		_Y						= 700;
 	private static final int		_X						= 900;
 	private static final long		serialVersionUID		= 1L;
-	private static final int		LENGHT_VERTEX_CIDADE	= 30;
-	private static final int		LENGHT_VERTEX_FORMIGA	= 10;
+	private static final int		LENGHT_VERTEX_CIDADE	= 10;
+	private static final int		LENGHT_VERTEX_FORMIGA	= 40;
 
 	private int						x						= 5;
 	private int						y						= 5;
@@ -329,7 +342,7 @@ public class ColoniaFormigasView extends JFrame {
 
 			String style = EDGE_STYLE + ";strokeColor=#FFFFFF";
 
-			mxCell obj = (mxCell) graph.insertEdge(parent, null, null, origem, destino, style);
+			mxCell obj = (mxCell) graph.insertEdge(parent, String.valueOf(c.getDistancia()), null, origem, destino, style);
 
 			 obj.setVisible(false);
 			mapEdge.put(c, obj);
@@ -353,15 +366,15 @@ public class ColoniaFormigasView extends JFrame {
 			int x = cell.getGeometry().getPoint().x;
 			int y = cell.getGeometry().getPoint().y;
 
-			// String pathJar = System.getProperty("user.dir");
-			// ImageIcon imagemPath = new ImageIcon(pathJar +
-			// "\\resources\\imagens\\images.png");
+			 String pathJar = System.getProperty("user.dir");
+			 ImageIcon imagemPath = new ImageIcon(pathJar +
+			 "\\resources\\imagens\\images.png");
 
-			// String style =
-			// "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter;imageWidth=1000;imageHeight=1000;shape=image;image=file:"
-			// + imagemPath;
+			 String style =
+			 "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter;imageWidth=1000;imageHeight=1000;shape=image;image=file:"
+			 + imagemPath;
 
-			String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter";
+			//			String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter";
 			Object obj = graph.insertVertex(parent, String.valueOf(f.getId()), String.valueOf(f.getId()), x, y, LENGHT_VERTEX_FORMIGA, LENGHT_VERTEX_FORMIGA, style);
 			mapVertexFormiga.put(f.getId(), obj);
 		}
@@ -392,11 +405,11 @@ public class ColoniaFormigasView extends JFrame {
 			graph.getModel().beginUpdate();
 			String color = null;
 			if (c.getFeromonio().getQntFeromonio() <= 0.000070) {
-				color = ";strokeColor=#C3C3C3";
+				color = ";strokeColor=#63B8FF";
 			} else if (c.getFeromonio().getQntFeromonio() <= 0.000093) {
-				color = ";strokeColor=#6F6D6D";
+				color = ";strokeColor=#1C86EE";
 			} else {
-				color = ";strokeColor=#000000";
+				color = ";strokeColor=#0000CD";
 			}
 
 			String style = EDGE_STYLE + color;
@@ -487,6 +500,8 @@ public class ColoniaFormigasView extends JFrame {
 					addConsoleText("Algoritmo finalizado...");
 					addConsoleText("Tempo Gasto: " + (fim - inicial));
 
+					createGrafico();
+
 					return null;
 				}
 
@@ -550,7 +565,40 @@ public class ColoniaFormigasView extends JFrame {
 
 			caminhoArquivoField.setText(chooser.getSelectedFile().getAbsolutePath());
 		}
+	}
 
+	public void createGrafico() {
+
+		// Create a simple XY chart
+		XYSeries series = new XYSeries("XYGraph");
+		XYSeries series1 = new XYSeries("XYGraph1");
+
+		JFrame frame = new JFrame();
+
+		for (Estatistica e : EstatisticasControler.getInstance().getEstatisticas()) {
+			series.add(e.getFormigaId(), e.getTempoGasto());
+			series1.add(e.getFormigaId(), e.getTempoGasto());
+		}
+
+		// Add the series to your data set
+		XYSeriesCollection dataset = new XYSeriesCollection();
+		dataset.addSeries(series);
+		dataset.addSeries(series1);
+
+		// Generate the graph
+		JFreeChart chart = ChartFactory.createXYLineChart("XY Chart", "x-axis", "y-axis", dataset, PlotOrientation.VERTICAL, true, true, false);
+		frame.getContentPane().add(new ChartPanel(chart));
+
+		frame.setPreferredSize(new Dimension(600, 600));
+		frame.setMinimumSize(new Dimension(600, 600));
+		frame.setMaximumSize(new Dimension(600, 600));
+		frame.setVisible(true);
+
+		try {
+			ChartUtilities.saveChartAsJPEG(new File("C:\\chart.jpg"), chart, 500, 300);
+		} catch (IOException e) {
+			System.err.println("Problem occurred creating chart.");
+		}
 	}
 
 }

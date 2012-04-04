@@ -59,7 +59,7 @@ public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface
 		control = new ControladorGeral(algoritmo, percurso);
 		control.setMaximoIteracoes(maximoIteracoes);
 
-		controlFuture = Executors.newFixedThreadPool(1).submit(control);
+		controlFuture = Executors.newCachedThreadPool().submit(control);
 	}
 
 	public void setMaximoIteracoes(int maximo) {
