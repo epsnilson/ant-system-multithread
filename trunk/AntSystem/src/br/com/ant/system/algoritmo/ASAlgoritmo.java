@@ -106,8 +106,7 @@ public class ASAlgoritmo {
 				 * Ira remover o caminho inverso do trajeto.
 				 */
 				if (caminhoInverso != null && c.getCidadeDestino().equals(caminhoInverso.getCidadeOrigem()) && it.hasNext()) {
-					logger.info("Removendo o caminho inverso do trajeto.");
-					it.remove();
+					logger.info("Ignorando o caminho inverso do trajeto.");
 					continue;
 				}
 

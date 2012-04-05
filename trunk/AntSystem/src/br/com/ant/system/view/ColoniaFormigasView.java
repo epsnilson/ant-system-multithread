@@ -268,8 +268,8 @@ public class ColoniaFormigasView extends JFrame {
 
 		caminhoArquivoField = new JTextField();
 		caminhoArquivoField.setEnabled(false);
-		caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
-		// caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
+		// caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
+		caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
 
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -370,8 +370,7 @@ public class ColoniaFormigasView extends JFrame {
 
 			String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter;imageWidth=1000;imageHeight=1000;shape=image;image=file:" + imagemPath;
 
-			// String style =
-			// "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter";
+			// String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter";
 			Object obj = graph.insertVertex(parent, String.valueOf(f.getId()), String.valueOf(f.getId()), x, y, LENGHT_VERTEX_FORMIGA, LENGHT_VERTEX_FORMIGA, style);
 			mapVertexFormiga.put(f.getId(), obj);
 		}
@@ -467,11 +466,14 @@ public class ColoniaFormigasView extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			System.gc();
 
 			SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 				@Override
 				protected Void doInBackground() throws Exception {
 					executeButton.setEnabled(false);
+
+					EstatisticasControler.getInstance().clear();
 
 					long inicial = System.currentTimeMillis();
 
@@ -482,6 +484,7 @@ public class ColoniaFormigasView extends JFrame {
 						Caminho c = (Caminho) it.next();
 						percurso.addCaminho(c);
 					}
+
 					formigas = adicionarFormigas();
 
 					// Montando o grafo das cidades.
@@ -493,11 +496,12 @@ public class ColoniaFormigasView extends JFrame {
 						executeMonoThread();
 					}
 
+					EstatisticasControler.getInstance().loggerEstatisticas();
 					long fim = System.currentTimeMillis();
 					addConsoleText("Algoritmo finalizado...");
 					addConsoleText("Tempo Gasto: " + (fim - inicial));
 
-					createGrafico();
+					// createGrafico();
 
 					return null;
 				}

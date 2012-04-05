@@ -3,7 +3,7 @@ package br.com.ant.system.multithread.controller;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SimpleThreadFactory implements ThreadFactory {
+public class FormigaWaitThreadFactory implements ThreadFactory {
 
 	AtomicInteger	poolNumber	= new AtomicInteger(0);
 
@@ -12,7 +12,7 @@ public class SimpleThreadFactory implements ThreadFactory {
 		Thread thread = new Thread(r);
 
 		poolNumber.set(poolNumber.get() + 1);
-		thread.setName("MultiThreadFormigas " + poolNumber.get());
+		thread.setName("FormigaWait " + poolNumber.get());
 		thread.setPriority(Thread.MAX_PRIORITY);
 
 		return thread;

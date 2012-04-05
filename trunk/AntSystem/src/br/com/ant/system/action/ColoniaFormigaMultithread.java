@@ -25,7 +25,6 @@ import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Formiga;
 import br.com.ant.system.multithread.controller.ControladorGeral;
-import br.com.ant.system.multithread.controller.SimpleThreadFactory;
 
 /**
  * 
