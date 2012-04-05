@@ -268,8 +268,8 @@ public class ColoniaFormigasView extends JFrame {
 
 		caminhoArquivoField = new JTextField();
 		caminhoArquivoField.setEnabled(false);
-		// caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
-		caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
+		caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
+		// caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
 
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -344,7 +344,6 @@ public class ColoniaFormigasView extends JFrame {
 
 			mxCell obj = (mxCell) graph.insertEdge(parent, String.valueOf(c.getDistancia()), null, origem, destino, style);
 
-			 obj.setVisible(false);
 			mapEdge.put(c, obj);
 		}
 	}
@@ -366,15 +365,13 @@ public class ColoniaFormigasView extends JFrame {
 			int x = cell.getGeometry().getPoint().x;
 			int y = cell.getGeometry().getPoint().y;
 
-			 String pathJar = System.getProperty("user.dir");
-			 ImageIcon imagemPath = new ImageIcon(pathJar +
-			 "\\resources\\imagens\\images.png");
+			String pathJar = System.getProperty("user.dir");
+			ImageIcon imagemPath = new ImageIcon(pathJar + "\\resources\\imagens\\images.png");
 
-			 String style =
-			 "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter;imageWidth=1000;imageHeight=1000;shape=image;image=file:"
-			 + imagemPath;
+			String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter;imageWidth=1000;imageHeight=1000;shape=image;image=file:" + imagemPath;
 
-			//			String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter";
+			// String style =
+			// "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter";
 			Object obj = graph.insertVertex(parent, String.valueOf(f.getId()), String.valueOf(f.getId()), x, y, LENGHT_VERTEX_FORMIGA, LENGHT_VERTEX_FORMIGA, style);
 			mapVertexFormiga.put(f.getId(), obj);
 		}
@@ -529,13 +526,8 @@ public class ColoniaFormigasView extends JFrame {
 			if (coloniaFormigaAction instanceof ColoniaFormigaMultithread) {
 				ColoniaFormigaMultithread multiThread = (ColoniaFormigaMultithread) coloniaFormigaAction;
 
+				multiThread.addFormigas(formigas);
 				multiThread.action();
-
-				for (Formiga formiga : formigas) {
-					multiThread.addFormiga(formiga);
-				}
-
-				multiThread.waitForEnd();
 			}
 
 		}
@@ -547,7 +539,6 @@ public class ColoniaFormigasView extends JFrame {
 
 			coloniaFormigaAction.action();
 		}
-
 	}
 
 	public class BuscarArquivoAction extends AbstractAction {
