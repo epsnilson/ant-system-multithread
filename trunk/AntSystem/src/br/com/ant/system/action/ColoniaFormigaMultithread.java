@@ -14,6 +14,7 @@
  */
 package br.com.ant.system.action;
 
+import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -24,6 +25,7 @@ import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Formiga;
 import br.com.ant.system.multithread.controller.ControladorGeral;
+import br.com.ant.system.multithread.controller.SimpleThreadFactory;
 
 /**
  * 
@@ -31,9 +33,6 @@ import br.com.ant.system.multithread.controller.ControladorGeral;
  * 
  */
 public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface {
-
-	private PercursoController	percurso;
-	private ASAlgoritmo			algoritmo;
 
 	private ControladorGeral	control;
 	private int					maximoIteracoes;
@@ -44,22 +43,27 @@ public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface
 	Logger						logger	= Logger.getLogger(this.getClass());
 
 	public ColoniaFormigaMultithread(PercursoController percurso, ASAlgoritmo algoritmo) {
-		this.algoritmo = algoritmo;
-		this.percurso = percurso;
-
+		control = new ControladorGeral(algoritmo, percurso);
 		algoritmo.inicializarFeromonio(percurso.getCaminhosDisponiveis(), percurso.getCidadesPercurso().size());
 	}
 
-	public void setPercurso(PercursoController percurso) {
-
+	public void addFormigas(Collection<Formiga> formigas) {
+		control.setFormigasDisponiveis(formigas);
 	}
 
 	@Override
 	public void action() {
-		control = new ControladorGeral(algoritmo, percurso);
 		control.setMaximoIteracoes(maximoIteracoes);
 
-		controlFuture = Executors.newCachedThreadPool().submit(control);
+		try {
+			controlFuture =  Executors.newCachedThreadPool().submit(control);
+			
+			controlFuture.get();
+		} catch (InterruptedException e) {
+			logger.info("A Thread de controle foi interrompida.");
+		} catch (ExecutionException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void setMaximoIteracoes(int maximo) {
@@ -69,23 +73,5 @@ public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface
 	@Override
 	public int getMaximoIteracoes() {
 		return maximoIteracoes;
-	}
-
-	public void addFormiga(Formiga formiga) {
-		control.addFormiga(formiga);
-	}
-
-	public void waitForEnd() {
-		try {
-			controlFuture.get();
-		} catch (InterruptedException e) {
-			logger.info("A Thread de controle foi interrompida.");
-		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public void clear() {
-		control.clear();
 	}
 }

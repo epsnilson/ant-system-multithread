@@ -45,7 +45,7 @@ public class FeromonioController {
 	 * @param formiga
 	 *            Formiga que percorreu o caminho
 	 */
-	public synchronized void adicionarFeromonioTrajeto(Formiga formiga) {
+	public void adicionarFeromonioTrajeto(Formiga formiga) {
 		// Recupera o trajeto efetuado pela formiga
 		List<Caminho> trajetosFormigas = formiga.getTrajetoCidades();
 

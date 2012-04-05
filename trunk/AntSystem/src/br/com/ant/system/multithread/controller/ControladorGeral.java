@@ -1,5 +1,6 @@
 package br.com.ant.system.multithread.controller;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -20,21 +21,19 @@ import br.com.ant.system.model.Formiga;
 public class ControladorGeral implements Runnable {
 
 	@SuppressWarnings("rawtypes")
-	private Future				auxServicesFuture;
-
-	@SuppressWarnings("rawtypes")
 	private Future				formigaExecutionFuture;
 
 	private Set<Formiga>		formigasDisponiveis	= new HashSet<Formiga>();
 	private Set<Formiga>		formigasFinalizadas	= new HashSet<Formiga>();
 
-	private ExecutorService		executor			= Executors.newFixedThreadPool(3, new SimpleThreadFactory());
+	// private ExecutorService executor = Executors.newFixedThreadPool(3, new
+	// SimpleThreadFactory());
+	private ExecutorService		executor			= Executors.newCachedThreadPool(new SimpleThreadFactory());
 
 	private Logger				logger				= Logger.getLogger(this.getClass());
 
 	private ASAlgoritmo			algoritmo;
 	private PercursoController	percurso;
-	private BufferBlockingClass	buffer;
 	private AtomicInteger		maximoIteracoes		= new AtomicInteger();
 
 	private Lock				lock				= new ReentrantLock();
@@ -43,22 +42,20 @@ public class ControladorGeral implements Runnable {
 	public ControladorGeral(ASAlgoritmo algoritmo, PercursoController percurso) {
 		this.algoritmo = algoritmo;
 		this.percurso = percurso;
-
-		this.buffer = new BufferBlockingClass();
-
 	}
 
 	public void setPercurso(PercursoController percurso) {
 		this.percurso = percurso;
 	}
 
+	public void setFormigasDisponiveis(Collection<Formiga> formigasDisponiveis) {
+		this.formigasDisponiveis.addAll(formigasDisponiveis);
+	}
+
 	@Override
 	public void run() {
 		// Aciona o processamento das formigas
-		formigaExecutionFuture = executor.submit(new FormigaExecution());
-
-		// Acionando a thread de atualizacao de feromonio e coleta de dados estatisticos
-		auxServicesFuture = executor.submit(new AuxServicesUpdateClass(algoritmo, percurso, buffer));
+		formigaExecutionFuture = executor.submit(new FormigaExecution(formigasDisponiveis));
 
 		this.waitForAllFinished();
 
@@ -70,17 +67,7 @@ public class ControladorGeral implements Runnable {
 	}
 
 	public void stop() {
-		auxServicesFuture.cancel(true);
 		formigaExecutionFuture.cancel(true);
-
-	}
-
-	public void addFormiga(Formiga formiga) {
-		try {
-			buffer.addFomigaExecution(formiga);
-		} catch (InterruptedException e) {
-			logger.info("Nao foi possivel incluir a formiga na fila de execucao.");
-		}
 	}
 
 	public void waitForAllFinished() {
@@ -97,34 +84,54 @@ public class ControladorGeral implements Runnable {
 
 	public class FormigaExecution implements Runnable {
 
+		Collection<Formiga>	formigas;
+
+		public FormigaExecution(Collection<Formiga> formigas) {
+			this.formigas = formigas;
+		}
+
 		@Override
 		public void run() {
-			while (true) {
-				try {
-					Formiga formiga = buffer.takeFormigaExecution();
+			for (Formiga formiga : formigas) {
 
+				// executando a thread
+				Future<Formiga> formigaFuture = executor.submit(new MultiThreadDispatched(formiga, percurso, algoritmo, maximoIteracoes.get()));
+
+				FormigaWait formigaWait = new FormigaWait(formigaFuture);
+				Thread thread = new Thread(formigaWait);
+				thread.setName("FormigaWait " + formiga.getId());
+
+				thread.start();
+			}
+		}
+	}
+
+	public class FormigaWait implements Runnable {
+
+		Future<Formiga>	formigaFuture;
+
+		public FormigaWait(Future<Formiga> formigaFuture) {
+			this.formigaFuture = formigaFuture;
+		}
+
+		@Override
+		public void run() {
+			try {
+
+				Formiga formiga = formigaFuture.get();
+				formigasFinalizadas.add(formiga);
+
+				if (formigasDisponiveis.size() == formigasFinalizadas.size()) {
 					try {
 						lock.lock();
-						formigasDisponiveis.add(formiga);
-
-						// executando a thread
-						if (formiga.getQntIteracaoExecutadas() < maximoIteracoes.get()) {
-							executor.submit(new MultiThreadDispatched(formiga, percurso, algoritmo, buffer));
-						} else {
-							formigasFinalizadas.add(formiga);
-
-							if (formigasDisponiveis.size() == formigasFinalizadas.size()) {
-								logger.info("Todas as formigas finalizaram o percurso.");
-								canContinue.signal();
-							}
-						}
+						logger.info("Todas as formigas finalizaram o percurso.");
+						canContinue.signal();
 					} finally {
 						lock.unlock();
 					}
-
-				} catch (InterruptedException e) {
-					logger.info("Thread de execucao de formigas foi interrompida.");
 				}
+			} catch (Exception e) {
+				logger.info("Thread de execucao de formigas foi interrompida.");
 			}
 		}
 	}
@@ -135,10 +142,5 @@ public class ControladorGeral implements Runnable {
 
 	public int getMaximoIteracoes() {
 		return maximoIteracoes.get();
-	}
-
-	public void clear() {
-		formigasDisponiveis.clear();
-		formigasFinalizadas.clear();
 	}
 }

@@ -14,46 +14,45 @@
  */
 package br.com.ant.system.notificacao;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.log4j.Logger;
 
 public class NotificationController {
 
-		  private static final int			  MAX_CAPACITY = 10000;
-		  ArrayBlockingQueue<Notificacao>	   notificacoes = new ArrayBlockingQueue<Notificacao>(MAX_CAPACITY);
-		  Logger								logger	   = Logger.getLogger(this.getClass());
+	LinkedBlockingDeque<Notificacao>		notificacoes	= new LinkedBlockingDeque<Notificacao>();
+	Logger									logger			= Logger.getLogger(this.getClass());
 
-		  private static NotificationController instance;
+	private static NotificationController	instance;
 
-		  public static NotificationController getInstance() {
-					if (instance == null) {
-							  instance = new NotificationController();
-					}
+	public static NotificationController getInstance() {
+		if (instance == null) {
+			instance = new NotificationController();
+		}
 
-					return instance;
-		  }
+		return instance;
+	}
 
-		  private NotificationController() {
-		  }
+	private NotificationController() {
+	}
 
-		  public void addNotificacao(Notificacao notificao) {
-					try {
-							  notificacoes.put(notificao);
-					} catch (InterruptedException e) {
-							  logger.error("Nao foi possivel incluir a notificacao da fila", e);
-					}
-		  }
+	public void addNotificacao(Notificacao notificao) {
+		try {
+			notificacoes.put(notificao);
+		} catch (InterruptedException e) {
+			logger.error("Nao foi possivel incluir a notificacao da fila", e);
+		}
+	}
 
-		  public Notificacao takeNotificacao() {
-					try {
-							  return notificacoes.take();
-					} catch (InterruptedException e) {
-							  throw new RuntimeException(e);
-					}
-		  }
+	public Notificacao takeNotificacao() {
+		try {
+			return notificacoes.take();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-		  public void clearNotification() {
-					notificacoes.clear();
-		  }
+	public void clearNotification() {
+		notificacoes.clear();
+	}
 }
