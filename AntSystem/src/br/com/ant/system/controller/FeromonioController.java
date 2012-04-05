@@ -16,6 +16,8 @@ package br.com.ant.system.controller;
 
 import java.util.List;
 
+import javax.sql.rowset.spi.SyncResolver;
+
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Formiga;
@@ -45,7 +47,7 @@ public class FeromonioController {
 	 * @param formiga
 	 *            Formiga que percorreu o caminho
 	 */
-	public void adicionarFeromonioTrajeto(Formiga formiga) {
+	public synchronized void adicionarFeromonioTrajeto(Formiga formiga) {
 		// Recupera o trajeto efetuado pela formiga
 		List<Caminho> trajetosFormigas = formiga.getTrajetoCidades();
 

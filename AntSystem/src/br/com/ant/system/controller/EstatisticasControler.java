@@ -35,15 +35,15 @@ public class EstatisticasControler {
 
 	private List<Caminho>					melhorCaminho	= new LinkedList<Caminho>();
 	private double							menorCaminhoPercorrido;
-	private Long							tempoGastoMelhorCaminho;
+	private long							tempoGastoMelhorCaminho;
 
 	private int								numeroIteracoes;
 
 	private long							horarioInicial;
 	private long							horarioFinal;
 
-	Logger									logger			= Logger.getLogger(this.getClass());
 	private List<Estatistica>				estatisticas	= new ArrayList<Estatistica>();
+	Logger									logger			= Logger.getLogger(this.getClass());
 
 	private static EstatisticasControler	instance;
 
@@ -53,6 +53,17 @@ public class EstatisticasControler {
 		}
 
 		return instance;
+	}
+
+	public void clear() {
+		menorCaminhoPercorrido = 0;
+		melhorCaminho.clear();
+		tempoGastoMelhorCaminho = 0L;
+		numeroIteracoes = 0;
+		horarioFinal = 0;
+		horarioInicial = 0;
+
+		estatisticas.clear();
 	}
 
 	private EstatisticasControler() {
