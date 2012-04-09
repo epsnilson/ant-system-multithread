@@ -32,8 +32,7 @@ public class Cidade {
 
 	@Override
 	public boolean equals(Object obj) {
-		Cidade c = (Cidade) obj;
-		if (c.getNome().equals(nome)) {
+		if (((Cidade) obj).getNome().equals(nome)) {
 			return true;
 		}
 

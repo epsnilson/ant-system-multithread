@@ -59,19 +59,19 @@ public class ColoniaFormigaMonothread implements ColoniaFormigasActionInterface 
 	 * Executa o algoritmo.
 	 */
 	public void action() {
-		logger.info("Iniciando a execução do Algoritmo...");
-		logger.info("Maximo Interacoes: " + maximoIteracoes);
-		logger.info("Quantidade de formigas: " + formigas.size());
-		logger.info("Quantidade de cidades: " + percursoController.getCidadesPercurso().size());
+//		logger.info("Iniciando a execução do Algoritmo...");
+//		logger.info("Maximo Interacoes: " + maximoIteracoes);
+//		logger.info("Quantidade de formigas: " + formigas.size());
+//		logger.info("Quantidade de cidades: " + percursoController.getCidadesPercurso().size());
 
 		EstatisticasControler.getInstance().setNumeroIteracoes(maximoIteracoes);
 		EstatisticasControler.getInstance().setHorarioInicial(System.currentTimeMillis());
-		logger.info("Horario Inicial: " + horaFormat.format(EstatisticasControler.getInstance().getHorarioInicial()));
+//		logger.info("Horario Inicial: " + horaFormat.format(EstatisticasControler.getInstance().getHorarioInicial()));
 
 		for (int i = 0; i < maximoIteracoes; i++) {
-			logger.info("************** Iteracao N. " + i + " ******************");
+//			logger.info("************** Iteracao N. " + i + " ******************");
 			for (FormigaController controller : formigas) {
-				logger.info("Formiga: " + controller.getFormiga().getId());
+//				logger.info("Formiga: " + controller.getFormiga().getId());
 
 				// Setando o tempo inicial
 				controller.getFormiga().setTempoInicial(System.currentTimeMillis());
@@ -100,11 +100,8 @@ public class ColoniaFormigaMonothread implements ColoniaFormigasActionInterface 
 
 		EstatisticasControler.getInstance().setHorarioFinal(System.currentTimeMillis());
 
-		// Exibindo dados da estatisticos.
-		EstatisticasControler.getInstance().loggerEstatisticas();
-
-		logger.info("Horario Final: " + horaFormat.format(EstatisticasControler.getInstance().getHorarioFinal()));
-		logger.info("Tempo de execucao: " + minutoFormat.format(EstatisticasControler.getInstance().getTempoExecucao()));
+//		logger.info("Horario Final: " + horaFormat.format(EstatisticasControler.getInstance().getHorarioFinal()));
+//		logger.info("Tempo de execucao: " + minutoFormat.format(EstatisticasControler.getInstance().getTempoExecucao()));
 	}
 
 	@Override

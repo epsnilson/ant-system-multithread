@@ -59,7 +59,7 @@ public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface
 			
 			controlFuture.get();
 		} catch (InterruptedException e) {
-			logger.info("A Thread de controle foi interrompida.");
+//			logger.info("A Thread de controle foi interrompida.");
 		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		}

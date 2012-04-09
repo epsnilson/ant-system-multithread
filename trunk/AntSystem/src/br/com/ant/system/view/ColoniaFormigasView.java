@@ -249,7 +249,7 @@ public class ColoniaFormigasView extends JFrame {
 
 		iteracoesLabel = new JLabel("Num. Iteracoes: ");
 		iteracoesField = new NumberField();
-		iteracoesField.setText("99");
+		iteracoesField.setText("999");
 
 		monothreadButton = new JRadioButton("MonoThread", true);
 		multiThreadButton = new JRadioButton("MultiThread");
@@ -268,8 +268,8 @@ public class ColoniaFormigasView extends JFrame {
 
 		caminhoArquivoField = new JTextField();
 		caminhoArquivoField.setEnabled(false);
-		// caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
-		caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
+		caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
+		// caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
 
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -370,7 +370,8 @@ public class ColoniaFormigasView extends JFrame {
 
 			String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter;imageWidth=1000;imageHeight=1000;shape=image;image=file:" + imagemPath;
 
-			// String style = "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter";
+			// String style =
+			// "fillColor=#66FF00;strokecolor=#66FF00;perimeter=rectanglePerimeter";
 			Object obj = graph.insertVertex(parent, String.valueOf(f.getId()), String.valueOf(f.getId()), x, y, LENGHT_VERTEX_FORMIGA, LENGHT_VERTEX_FORMIGA, style);
 			mapVertexFormiga.put(f.getId(), obj);
 		}
@@ -437,7 +438,8 @@ public class ColoniaFormigasView extends JFrame {
 		@Override
 		public void run() {
 			while (true) {
-				Notificacao notificacao = NotificationController.getInstance().takeNotificacao();
+				final Notificacao notificacao = NotificationController.getInstance().takeNotificacao();
+
 				Object obj = notificacao.getObj();
 
 				execute(notificacao, obj);
@@ -466,16 +468,15 @@ public class ColoniaFormigasView extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.gc();
-
 			SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+				volatile long	inicial;
+				volatile long	fim;
+
 				@Override
 				protected Void doInBackground() throws Exception {
 					executeButton.setEnabled(false);
 
 					EstatisticasControler.getInstance().clear();
-
-					long inicial = System.currentTimeMillis();
 
 					addConsoleText("Importando o arquivos de cidades...");
 					caminhos = ImportarArquivoCidades(caminhoArquivoField.getText());
@@ -490,19 +491,20 @@ public class ColoniaFormigasView extends JFrame {
 					// Montando o grafo das cidades.
 					montarGrafo(caminhos, formigas);
 
+					inicial = System.currentTimeMillis();
+
 					if (multiThreadButton.isSelected()) {
 						executeMultiThread();
 					} else if (monothreadButton.isSelected()) {
 						executeMonoThread();
 					}
 
-					EstatisticasControler.getInstance().loggerEstatisticas();
-					long fim = System.currentTimeMillis();
-					addConsoleText("Algoritmo finalizado...");
-					addConsoleText("Tempo Gasto: " + (fim - inicial));
+					fim = System.currentTimeMillis();
 
 					// createGrafico();
 
+					addConsoleText("Algoritmo finalizado...");
+					addConsoleText("Tempo Gasto: " + (fim - inicial));
 					return null;
 				}
 
@@ -511,6 +513,11 @@ public class ColoniaFormigasView extends JFrame {
 					try {
 						get();
 						executeButton.setEnabled(true);
+
+//						EstatisticasControler.getInstance().loggerEstatisticas();
+
+						System.gc();
+						cancel(true);
 					} catch (Exception e) {
 						executeButton.setEnabled(true);
 
