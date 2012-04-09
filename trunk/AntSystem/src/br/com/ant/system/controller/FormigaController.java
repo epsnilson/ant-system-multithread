@@ -16,8 +16,6 @@ package br.com.ant.system.controller;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
@@ -38,8 +36,6 @@ public class FormigaController {
 	private Formiga				formiga;
 	private PercursoController	percursoController;
 	private ASAlgoritmo			algoritmo;
-
-	private Logger				logger	= Logger.getLogger(this.getClass());
 
 	public FormigaController(Formiga formiga, PercursoController percurso, ASAlgoritmo algoritmo) {
 		this.formiga = formiga;
@@ -88,10 +84,10 @@ public class FormigaController {
 	 * @param formiga
 	 */
 	public void clearFormiga() {
-//		logger.debug("Limpando as informações da formiga");
+		AntSystemUtil.getIntance().logar("Limpando as informações da formiga");
 
 		Cidade localizacaoAtual = percursoController.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(0, percursoController.getCidadesPercurso().size() - 1));
-//		logger.debug("Nova Localizacao Inicial: " + localizacaoAtual.getNome());
+		AntSystemUtil.getIntance().logar("Nova Localizacao Inicial: " + localizacaoAtual.getNome());
 
 		formiga.clear(localizacaoAtual);
 	}

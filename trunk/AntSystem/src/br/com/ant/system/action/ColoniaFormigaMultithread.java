@@ -19,12 +19,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.log4j.Logger;
-
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Formiga;
 import br.com.ant.system.multithread.controller.ControladorGeral;
+import br.com.ant.system.util.AntSystemUtil;
 
 /**
  * 
@@ -38,8 +37,6 @@ public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface
 
 	@SuppressWarnings("rawtypes")
 	Future						controlFuture;
-
-	Logger						logger	= Logger.getLogger(this.getClass());
 
 	public ColoniaFormigaMultithread(PercursoController percurso, ASAlgoritmo algoritmo) {
 		control = new ControladorGeral(algoritmo, percurso);
@@ -55,11 +52,11 @@ public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface
 		control.setMaximoIteracoes(maximoIteracoes);
 
 		try {
-			controlFuture =  Executors.newCachedThreadPool().submit(control);
-			
+			controlFuture = Executors.newCachedThreadPool().submit(control);
+
 			controlFuture.get();
 		} catch (InterruptedException e) {
-//			logger.info("A Thread de controle foi interrompida.");
+			AntSystemUtil.getIntance().logar("A Thread de controle foi interrompida.");
 		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		}

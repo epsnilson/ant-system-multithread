@@ -20,8 +20,10 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,8 +41,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.apache.log4j.Logger;
@@ -82,59 +86,62 @@ import com.mxgraph.view.mxGraph;
  * 
  */
 public class ColoniaFormigasView extends JFrame {
-	private static final String		EDGE_STYLE				= "startArrow=none;endArrow=none";
-	private static final int		_Y						= 700;
-	private static final int		_X						= 900;
-	private static final long		serialVersionUID		= 1L;
-	private static final int		LENGHT_VERTEX_CIDADE	= 10;
-	private static final int		LENGHT_VERTEX_FORMIGA	= 40;
+	private static final String				EDGE_STYLE				= "startArrow=none;endArrow=none";
+	private static final int				_Y						= 700;
+	private static final int				_X						= 900;
+	private static final long				serialVersionUID		= 1L;
+	private static final int				LENGHT_VERTEX_CIDADE	= 10;
+	private static final int				LENGHT_VERTEX_FORMIGA	= 40;
 
-	private int						x						= 5;
-	private int						y						= 5;
+	private int								x						= 5;
+	private int								y						= 5;
 
-	Set<Caminho>					caminhos;
-	Map<Cidade, Object>				mapVertexCidade			= new HashMap<Cidade, Object>();
-	Map<Integer, Object>			mapVertexFormiga		= new HashMap<Integer, Object>();
-	Map<Caminho, Object>			mapEdge					= new HashMap<Caminho, Object>();
+	private Set<Caminho>					caminhos;
+	private Map<Cidade, Object>				mapVertexCidade			= new HashMap<Cidade, Object>();
+	private Map<Integer, Object>			mapVertexFormiga		= new HashMap<Integer, Object>();
+	private Map<Caminho, Object>			mapEdge					= new HashMap<Caminho, Object>();
 
-	List<Formiga>					formigas;
+	private List<Formiga>					formigas;
 
-	mxGraph							graph;
-	mxGraphComponent				graphComponent;
+	private mxGraph							graph;
+	private mxGraphComponent				graphComponent;
 
-	JPanel							applicationPanel;
-	JPanel							leftPanel;
-	JPanel							rightTopPanel;
-	JPanel							rightFooterPanel;
+	private JPanel							applicationPanel;
+	private JPanel							leftPanel;
+	private JPanel							rightTopPanel;
+	private JPanel							rightFooterPanel;
 
-	JRadioButton					monothreadButton;
-	JRadioButton					multiThreadButton;
+	private JRadioButton					monothreadButton;
+	private JRadioButton					multiThreadButton;
 
-	JLabel							iteracoesLabel;
-	NumberField						iteracoesField;
-	JTextField						caminhoArquivoField;
-	JTextArea						consoleField;
+	private JLabel							iteracoesLabel;
+	private NumberField						iteracoesField;
+	private JTextField						caminhoArquivoField;
+	private JScrollPane						scrollPane;
+	private JTextArea						consoleField;
 
-	JButton							buscarArquivoButton;
-	JButton							executeButton;
+	private JButton							buscarArquivoButton;
+	private JButton							executeButton;
 
-	PercursoController				percurso;
-	ColoniaFormigasActionInterface	coloniaFormigaAction;
+	private PercursoController				percurso;
+	private ColoniaFormigasActionInterface	coloniaFormigaAction;
 
-	ASAlgoritmo						algoritmo;
-
-	Logger							logger					= Logger.getLogger(this.getClass());
-	NotificationImp					notificationImp;
+	private ASAlgoritmo						algoritmo;
+	private Logger							logger					= Logger.getLogger(this.getClass());
 
 	public ColoniaFormigasView() {
-		notificationImp = new NotificationImp();
-		percurso = new PercursoController();
+		new NotificationImp();
 		algoritmo = new ASAlgoritmo();
 
 		// Montar paines.
 		this.montarPaineis();
 	}
 
+	/**
+	 * Adiciona as formigas no percurso.
+	 * 
+	 * @return
+	 */
 	private List<Formiga> adicionarFormigas() {
 		List<Formiga> formigas = new ArrayList<Formiga>();
 		for (int i = 0; i < percurso.getCidadesPercurso().size(); i++) {
@@ -147,6 +154,13 @@ public class ColoniaFormigasView extends JFrame {
 		return formigas;
 	}
 
+	/**
+	 * Importa o arquivo de cidades.
+	 * 
+	 * @param pathArquivo
+	 *            localização do arquivo de cidades.
+	 * @return
+	 */
 	private Set<Caminho> ImportarArquivoCidades(String pathArquivo) {
 		ImportarArquivoCidades imp = new ImportarArquivoCidades();
 		final Set<Caminho> caminhos = imp.importarAquivo(pathArquivo);
@@ -154,6 +168,9 @@ public class ColoniaFormigasView extends JFrame {
 		return caminhos;
 	}
 
+	/**
+	 * Monta todos os paineis da aplicacao.
+	 */
 	private void montarPaineis() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -196,6 +213,11 @@ public class ColoniaFormigasView extends JFrame {
 
 	}
 
+	/**
+	 * Monta o painel esquerdo.
+	 * 
+	 * @return
+	 */
 	private JPanel montarLeftPanel() {
 		JPanel leftPanel = new JPanel(new GridBagLayout());
 		leftPanel.setBorder(BorderFactory.createTitledBorder("Grafico"));
@@ -218,6 +240,11 @@ public class ColoniaFormigasView extends JFrame {
 		return leftPanel;
 	}
 
+	/**
+	 * Monta o painel direito inferior.
+	 * 
+	 * @return
+	 */
 	private JPanel montarRightFooterPanel() {
 		GridBagConstraints gbc1 = new GridBagConstraints();
 		JPanel rightFooterPanel = new JPanel(new GridBagLayout());
@@ -232,16 +259,27 @@ public class ColoniaFormigasView extends JFrame {
 		gbc1.fill = GridBagConstraints.BOTH;
 		gbc1.anchor = GridBagConstraints.LINE_START;
 
+		scrollPane = new JScrollPane();
+		scrollPane.setAutoscrolls(true);
+
 		consoleField = new JTextArea();
 		consoleField.setEditable(false);
 		consoleField.setWrapStyleWord(true);
 
-		rightFooterPanel.add(consoleField, gbc1);
+		scrollPane.getViewport().add(consoleField);
+
+		rightFooterPanel.add(scrollPane, gbc1);
+
 		return rightFooterPanel;
 	}
 
+	/**
+	 * Monta o painel direito superior.
+	 * 
+	 * @return
+	 */
 	private JPanel montarRightTopPainel() {
-		FormLayout layout = new FormLayout("$lcgap, left:p,  $lcgap, p:grow, $lcgap", "$lg, p,$lg, p,$lg, p,$lg, p,$lg, p");
+		FormLayout layout = new FormLayout("$lcgap, left:p,  $lcgap, p:grow, $lcgap", "$lg, p,$lg, p,$lg, p,$lg, p,$lg, p ,$lg, B:p:grow");
 		CellConstraints cc = new CellConstraints();
 
 		JPanel rightTopPanel = new JPanel(layout);
@@ -268,8 +306,8 @@ public class ColoniaFormigasView extends JFrame {
 
 		caminhoArquivoField = new JTextField();
 		caminhoArquivoField.setEnabled(false);
-		caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
-		// caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
+		// caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
+		caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
 
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -295,6 +333,7 @@ public class ColoniaFormigasView extends JFrame {
 		panelArquivo.add(buscarArquivoButton, gbc);
 
 		executeButton = new JButton(new ExecutarAction());
+
 		rightTopPanel.add(panelGroup, cc.xyw(2, 2, 4));
 		rightTopPanel.add(iteracoesLabel, cc.xy(2, 4));
 		rightTopPanel.add(iteracoesField, cc.xy(4, 4));
@@ -304,6 +343,12 @@ public class ColoniaFormigasView extends JFrame {
 		return rightTopPanel;
 	}
 
+	/**
+	 * Monta o grafico.
+	 * 
+	 * @param caminhos
+	 * @param formigas
+	 */
 	private void montarGrafo(Collection<Caminho> caminhos, List<Formiga> formigas) {
 		NotificationController.getInstance().clearNotification();
 		Object parent = graph.getDefaultParent();
@@ -335,6 +380,12 @@ public class ColoniaFormigasView extends JFrame {
 		leftPanel.repaint();
 	}
 
+	/**
+	 * Adiciona um novo caminho no grafico.
+	 * 
+	 * @param parent
+	 * @param c
+	 */
 	private void addEdge(Object parent, Caminho c) {
 		if (!mapEdge.containsKey(c)) {
 			Object origem = mapVertexCidade.get(c.getCidadeOrigem());
@@ -348,6 +399,12 @@ public class ColoniaFormigasView extends JFrame {
 		}
 	}
 
+	/**
+	 * Adiciona uma cidade no grafico.
+	 * 
+	 * @param parent
+	 * @param c
+	 */
 	private void addVertexCidade(Object parent, Cidade c) {
 		if (!mapVertexCidade.containsKey(c)) {
 			x = AntSystemUtil.getIntance().getAleatorio(10, _X);
@@ -358,6 +415,12 @@ public class ColoniaFormigasView extends JFrame {
 		}
 	}
 
+	/**
+	 * Adiciona uma formiga no grafico.
+	 * 
+	 * @param parent
+	 * @param f
+	 */
 	private void addVertexFormiga(Object parent, Formiga f) {
 		if (!mapVertexFormiga.containsKey(f.getId())) {
 			mxCell cell = (mxCell) mapVertexCidade.get(f.getLocalizacaoCidadeInicial());
@@ -377,6 +440,12 @@ public class ColoniaFormigasView extends JFrame {
 		}
 	}
 
+	/**
+	 * Atualiza a cidade atual da formiga.
+	 * 
+	 * @param f
+	 *            Formiga a ser atualizada.
+	 */
 	public void updateVertexFormiga(Formiga f) {
 		mxCell cell = (mxCell) mapVertexFormiga.get(f.getId());
 		try {
@@ -396,6 +465,12 @@ public class ColoniaFormigasView extends JFrame {
 		}
 	}
 
+	/**
+	 * Atualiza a aresta de feromonio no grafico.
+	 * 
+	 * @param c
+	 *            Caminho a ser atualizado.
+	 */
 	public void updateEdgeFeromonio(Caminho c) {
 		mxCell cell = (mxCell) mapEdge.get(c);
 		try {
@@ -423,15 +498,30 @@ public class ColoniaFormigasView extends JFrame {
 
 	}
 
-	public void addConsoleText(String text) {
-		consoleField.setText(consoleField.getText() + text + "\n");
+	/**
+	 * Adiciona o texto no console.
+	 * 
+	 * @param text
+	 *            Texto a ser inserido
+	 */
+	public void addConsoleText(final String text) {
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				consoleField.setText(consoleField.getText() + text + "\n");
+				consoleField.moveCaretPosition(consoleField.getText().length());
+			}
+		});
 	}
 
+	/**
+	 * Classe responsavel pela atualizacao do grafico na tela.
+	 */
 	public class NotificationImp implements Runnable {
 		private NotificationImp() {
 			Thread thread = new Thread(this);
 			thread.setName("NotificationGrafo");
-			thread.setPriority(Thread.MAX_PRIORITY);
 			thread.start();
 		}
 
@@ -440,9 +530,14 @@ public class ColoniaFormigasView extends JFrame {
 			while (true) {
 				final Notificacao notificacao = NotificationController.getInstance().takeNotificacao();
 
-				Object obj = notificacao.getObj();
+				SwingUtilities.invokeLater(new Runnable() {
 
-				execute(notificacao, obj);
+					@Override
+					public void run() {
+						Object obj = notificacao.getObj();
+						execute(notificacao, obj);
+					}
+				});
 			}
 		}
 
@@ -459,6 +554,9 @@ public class ColoniaFormigasView extends JFrame {
 		}
 	}
 
+	/**
+	 * Action responsavel pela a acao do botao.
+	 */
 	public class ExecutarAction extends AbstractAction {
 		private static final long	serialVersionUID	= 182237609101003562L;
 
@@ -469,17 +567,16 @@ public class ColoniaFormigasView extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-				volatile long	inicial;
-				volatile long	fim;
-
 				@Override
 				protected Void doInBackground() throws Exception {
 					executeButton.setEnabled(false);
 
 					EstatisticasControler.getInstance().clear();
+					percurso = new PercursoController();
 
 					addConsoleText("Importando o arquivos de cidades...");
 					caminhos = ImportarArquivoCidades(caminhoArquivoField.getText());
+					addConsoleText("Arquivo importado com sucesso...\n");
 
 					for (Iterator<Caminho> it = caminhos.iterator(); it.hasNext();) {
 						Caminho c = (Caminho) it.next();
@@ -491,20 +588,25 @@ public class ColoniaFormigasView extends JFrame {
 					// Montando o grafo das cidades.
 					montarGrafo(caminhos, formigas);
 
-					inicial = System.currentTimeMillis();
+					long inicial = System.currentTimeMillis();
 
+					EstatisticasControler.getInstance().setHorarioInicial(inicial);
 					if (multiThreadButton.isSelected()) {
+						addConsoleText("Iniciando a execução do algoritmo em multiplas threads...");
 						executeMultiThread();
 					} else if (monothreadButton.isSelected()) {
+						addConsoleText("Iniciando a execução do algoritmo em monothread...");
 						executeMonoThread();
 					}
 
-					fim = System.currentTimeMillis();
+					long fim = System.currentTimeMillis();
 
 					// createGrafico();
 
-					addConsoleText("Algoritmo finalizado...");
-					addConsoleText("Tempo Gasto: " + (fim - inicial));
+					EstatisticasControler.getInstance().setHorarioFinal(fim);
+					addConsoleText("Tempo Gasto: " + new SimpleDateFormat("mm:ss:SSS").format(new Date(fim - inicial)));
+					addConsoleText("Algoritmo finalizado...\n");
+
 					return null;
 				}
 
@@ -514,9 +616,10 @@ public class ColoniaFormigasView extends JFrame {
 						get();
 						executeButton.setEnabled(true);
 
-//						EstatisticasControler.getInstance().loggerEstatisticas();
+						// EstatisticasControler.getInstance().loggerEstatisticas();
 
-						System.gc();
+						this.clear();
+
 						cancel(true);
 					} catch (Exception e) {
 						executeButton.setEnabled(true);
@@ -525,12 +628,23 @@ public class ColoniaFormigasView extends JFrame {
 						JOptionPane.showMessageDialog(null, e.getMessage());
 					}
 				}
+
+				private void clear() {
+					percurso.clear();
+					percurso = null;
+					formigas.clear();
+
+					System.gc();
+				}
 			};
 			worker.execute();
 		}
 
+		/**
+		 * Executa o algoritmo em multiplas threads.
+		 */
 		private void executeMultiThread() {
-			addConsoleText("Iniciando a execução do algoritmo em multiplas threads...");
+
 			coloniaFormigaAction = new ColoniaFormigaMultithread(percurso, algoritmo);
 			coloniaFormigaAction.setMaximoIteracoes(Integer.parseInt(iteracoesField.getText()));
 
@@ -543,8 +657,10 @@ public class ColoniaFormigasView extends JFrame {
 
 		}
 
+		/**
+		 * Executa o algoritmo em uma unica thread.
+		 */
 		private void executeMonoThread() {
-			addConsoleText("Iniciando a execução do algoritmo em monothread...");
 			coloniaFormigaAction = new ColoniaFormigaMonothread(formigas, algoritmo, percurso);
 			coloniaFormigaAction.setMaximoIteracoes(Integer.parseInt(iteracoesField.getText()));
 
@@ -552,6 +668,9 @@ public class ColoniaFormigasView extends JFrame {
 		}
 	}
 
+	/**
+	 * Action responsavel por efetuar a busca do arquivo de cidades.
+	 */
 	public class BuscarArquivoAction extends AbstractAction {
 
 		private static final long	serialVersionUID	= 1L;
@@ -602,5 +721,4 @@ public class ColoniaFormigasView extends JFrame {
 			System.err.println("Problem occurred creating chart.");
 		}
 	}
-
 }

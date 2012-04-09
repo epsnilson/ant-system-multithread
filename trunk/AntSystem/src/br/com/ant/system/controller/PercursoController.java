@@ -129,4 +129,15 @@ public class PercursoController {
 		return caminhosDisponiveis;
 	}
 
+	public void clear() {
+		caminhosDisponiveis.clear();
+		cidadesPercurso.clear();
+		mapPercurso.clear();
+
+		caminhosDisponiveis = null;
+		cidadesPercurso = null;
+		mapPercurso = null;
+
+	}
+
 }

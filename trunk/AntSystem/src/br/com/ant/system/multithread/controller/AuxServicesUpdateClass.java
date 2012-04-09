@@ -1,7 +1,5 @@
 package br.com.ant.system.multithread.controller;
 
-import org.apache.log4j.Logger;
-
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.EstatisticasControler;
 import br.com.ant.system.controller.FeromonioController;
@@ -15,7 +13,6 @@ public class AuxServicesUpdateClass implements Runnable {
 	PercursoController			percurso;
 	BufferBlockingClass			buffer;
 
-	Logger						logger	= Logger.getLogger(this.getClass());
 
 	public AuxServicesUpdateClass(ASAlgoritmo algoritmo, PercursoController percursoController, BufferBlockingClass buffer) {
 		feromonioController = new FeromonioController(algoritmo, percursoController);
@@ -46,7 +43,7 @@ public class AuxServicesUpdateClass implements Runnable {
 				buffer.addFomigaExecution(formiga);
 			}
 		} catch (InterruptedException e) {
-			logger.info("Thread de atualizacao de feromonio interropida.");
+			AntSystemUtil.getIntance().logar("Thread de atualizacao de feromonio interropida.");
 		}
 
 	}
