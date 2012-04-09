@@ -37,7 +37,7 @@ public class AntSystemApp {
 			} else {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			}
-			
+
 			ColoniaFormigasView frame = new ColoniaFormigasView();
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -48,6 +48,7 @@ public class AntSystemApp {
 			int height = mode.getHeight();
 			int width = mode.getWidth();
 
+			frame.setTitle("AntSystemMultithread");
 			frame.setSize(width, height - 30);
 			frame.setVisible(true);
 		} catch (Exception e) {

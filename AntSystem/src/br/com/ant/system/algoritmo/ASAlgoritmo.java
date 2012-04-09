@@ -20,11 +20,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Formiga;
-import br.com.ant.system.util.NumberUtil;
+import br.com.ant.system.util.AntSystemUtil;
 
 /**
  * Classe responsavel por efetuar os calculos de acordo com o especificado pelo algoritmo AS (Ant
@@ -51,8 +49,6 @@ public class ASAlgoritmo {
 	 * Dorigo recomenda que a importancia da visibilidade do cidade fique em torno de 5.
 	 */
 	private double	pesoVisibilidade				= 5;
-
-	private Logger	logger							= Logger.getLogger(this.getClass());
 
 	/**
 	 * Escolhe o Melhor caminho apartir dos caminhos disponiveis e do algoritmo proposto pelo
@@ -85,7 +81,7 @@ public class ASAlgoritmo {
 		 */
 		Caminho escolhido = null;
 		if (mapProbabilidadesDisponiveis.isEmpty()) {
-//			logger.info("Todos os caminhos ja foram visitados. Utilizando solução customizada.");
+			AntSystemUtil.getIntance().logar("Todos os caminhos ja foram visitados. Utilizando solução customizada.");
 			Caminho caminhoInverso = formiga.getUltimoCaminho();
 			Map<Integer, List<Caminho>> mapPesos = new HashMap<Integer, List<Caminho>>();
 
@@ -97,7 +93,7 @@ public class ASAlgoritmo {
 				 * cidade inicial da formiga e todas as cidades já forem visitadas.
 				 */
 				if (c.getCidadeDestino().equals(formiga.getLocalizacaoCidadeInicial()) && formiga.isTodasVisitadas()) {
-//					logger.info("Cidade destino == Cidade Inicial da formiga.");
+					AntSystemUtil.getIntance().logar("Cidade destino == Cidade Inicial da formiga.");
 					escolhido = c;
 					break;
 				}
@@ -106,7 +102,7 @@ public class ASAlgoritmo {
 				 * Ira remover o caminho inverso do trajeto.
 				 */
 				if (caminhoInverso != null && c.getCidadeDestino().equals(caminhoInverso.getCidadeOrigem()) && it.hasNext()) {
-//					logger.info("Ignorando o caminho inverso do trajeto.");
+					AntSystemUtil.getIntance().logar("Ignorando o caminho inverso do trajeto.");
 					continue;
 				}
 
@@ -143,11 +139,11 @@ public class ASAlgoritmo {
 		 * Se o caminho ainda tiver sido escolhido, irá seguir o algoritmo do AntSystem.
 		 */
 		if (escolhido == null) {
-//			logger.debug("Soma de custos: " + NumberUtil.getInstance().doubleToString(somaProbabilidadesDisponiveis));
+			AntSystemUtil.getIntance().logar("Soma de custos: " + somaProbabilidadesDisponiveis);
 			escolhido = this.buscarMelhorCaminho(mapProbabilidadesDisponiveis, somaProbabilidadesDisponiveis);
 		}
 
-//		logger.info("Caminho escolhido: " + escolhido.toString());
+		AntSystemUtil.getIntance().logar("Caminho escolhido: " + escolhido.toString());
 
 		mapProbabilidadesDisponiveis = null;
 
@@ -185,7 +181,7 @@ public class ASAlgoritmo {
 		Caminho melhorCaminho = null;
 		for (Caminho c : mapProbabilidade.keySet()) {
 			double probabilidade = mapProbabilidade.get(c) / somaProbabilidades;
-//			logger.debug("Probabilidade " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + NumberUtil.getInstance().doubleToString(probabilidade));
+			AntSystemUtil.getIntance().logar("Probabilidade " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + probabilidade);
 
 			if (melhorProbabilidade == 0 || probabilidade > melhorProbabilidade) {
 				melhorProbabilidade = probabilidade;
@@ -205,7 +201,7 @@ public class ASAlgoritmo {
 	private double calcularProbabilidadeCaminho(Caminho c) {
 		double visibilidadeCidade = 1 / c.getDistancia();
 		double probabilidadeCaminho = (Math.pow(c.getFeromonio().getQntFeromonio(), pesoFeromonio) * Math.pow(visibilidadeCidade, pesoVisibilidade));
-//		logger.debug("Custo caminho " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + NumberUtil.getInstance().doubleToString(probabilidadeCaminho));
+		AntSystemUtil.getIntance().logar("Custo caminho " + c.getCidadeOrigem().getNome() + " ate " + c.getCidadeDestino().getNome() + " ==> " + probabilidadeCaminho);
 
 		return probabilidadeCaminho;
 	}
@@ -219,7 +215,7 @@ public class ASAlgoritmo {
 	 */
 	private double evaporacaoFeromonio(double qntFeromonioAtual) {
 		double novaQntFeromonio = (1 - taxaEvaporacaoFeromonio) * qntFeromonioAtual;
-//		logger.debug("Quantidade feromonio apos evaporacao: " + novaQntFeromonio);
+		AntSystemUtil.getIntance().logar("Quantidade feromonio apos evaporacao: " + novaQntFeromonio);
 
 		return novaQntFeromonio;
 	}
@@ -234,15 +230,15 @@ public class ASAlgoritmo {
 	 * @return Retorna a quantidade do novo feromonio
 	 */
 	public double atualizarFeromonio(double qntFeromonioAtual, double distanciaPercurso) {
-//		logger.debug("Atualizando quantidade de feromonio...");
-//		logger.debug("Quanidade de Feromonio atual: " + NumberUtil.getInstance().doubleToString(qntFeromonioAtual));
-//		logger.debug("Distancia percorrida pela formiga: " + NumberUtil.getInstance().doubleToString(distanciaPercurso));
+		AntSystemUtil.getIntance().logar("Atualizando quantidade de feromonio...");
+		AntSystemUtil.getIntance().logar("Quanidade de Feromonio atual: " + qntFeromonioAtual);
+		AntSystemUtil.getIntance().logar("Distancia percorrida pela formiga: " + distanciaPercurso);
 
 		double quantidadeFeromonioDepositada = quantidadeFeromonioIncrementado / distanciaPercurso;
 
 		double novaQntFeromonio = this.evaporacaoFeromonio(qntFeromonioAtual) + quantidadeFeromonioDepositada;
 
-//		logger.debug("Nova quantidade de feromonio gerado: " + NumberUtil.getInstance().doubleToString(novaQntFeromonio));
+		AntSystemUtil.getIntance().logar("Nova quantidade de feromonio gerado: " + novaQntFeromonio);
 
 		return novaQntFeromonio;
 	}

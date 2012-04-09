@@ -59,8 +59,4 @@ public class NumberUtil {
 	public boolean equalsDouble(Double d1, Double d2) {
 		return (Math.abs(d1 - d2) < TOLERANCIA_IGUALDADE_DOUBLE);
 	}
-
-	public String doubleToString(double d) {
-		return df.format(d);
-	}
 }

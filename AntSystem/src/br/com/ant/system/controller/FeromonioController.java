@@ -16,14 +16,12 @@ package br.com.ant.system.controller;
 
 import java.util.List;
 
-import javax.sql.rowset.spi.SyncResolver;
-
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Formiga;
 import br.com.ant.system.notificacao.Notificacao;
-import br.com.ant.system.notificacao.NotificationController;
 import br.com.ant.system.notificacao.Notificacao.NotificacaoEnum;
+import br.com.ant.system.notificacao.NotificationController;
 
 /**
  * Classe responsaveis pelas acoes de cada formiga.

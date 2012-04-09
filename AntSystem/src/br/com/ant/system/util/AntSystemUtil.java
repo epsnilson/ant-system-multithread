@@ -23,6 +23,7 @@ package br.com.ant.system.util;
 public class AntSystemUtil {
 
 	private static AntSystemUtil	instance;
+	private boolean					logar	= false;
 
 	public static synchronized AntSystemUtil getIntance() {
 		if (instance == null) {
@@ -47,5 +48,11 @@ public class AntSystemUtil {
 	public int getAleatorio(int min, int max) {
 		int aleatorio = min + (int) ((max - min) * Math.random());
 		return aleatorio;
+	}
+
+	public void logar(String text) {
+		if (logar) {
+			System.out.println(text);
+		}
 	}
 }
