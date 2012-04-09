@@ -2,13 +2,11 @@ package br.com.ant.system.multithread.controller;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
 
@@ -22,10 +20,8 @@ public class ControladorGeral implements Runnable {
 	private Future								formigaExecutionFuture;
 
 	private ConcurrentHashMap<Integer, Formiga>	formigasDisponiveis	= new ConcurrentHashMap<Integer, Formiga>();
-	private ConcurrentHashMap<Integer, Formiga>	formigasFinalizadas	= new ConcurrentHashMap<Integer, Formiga>();
 
 	private ExecutorService						executor			= Executors.newCachedThreadPool(new FormigaExecutionThreadFactory());
-	private ExecutorService						executorWait		= Executors.newCachedThreadPool(new FormigaWaitThreadFactory());
 
 	private Logger								logger				= Logger.getLogger(this.getClass());
 
@@ -33,8 +29,7 @@ public class ControladorGeral implements Runnable {
 	private PercursoController					percurso;
 	private AtomicInteger						maximoIteracoes		= new AtomicInteger();
 
-	private Lock								lock				= new ReentrantLock();
-	private Condition							canContinue			= lock.newCondition();
+	private CountDownLatch						downLatch;
 
 	public ControladorGeral(ASAlgoritmo algoritmo, PercursoController percurso) {
 		this.algoritmo = algoritmo;
@@ -48,35 +43,29 @@ public class ControladorGeral implements Runnable {
 	public void setFormigasDisponiveis(Collection<Formiga> formigasDisponiveis) {
 		for (Formiga formiga : formigasDisponiveis) {
 			this.formigasDisponiveis.putIfAbsent(formiga.getId(), formiga);
-
 		}
 	}
 
 	@Override
 	public void run() {
-		// Aciona o processamento das formigas
-		formigaExecutionFuture = executor.submit(new FormigaExecution(formigasDisponiveis));
 
-		this.waitForAllFinished();
-		this.stop();
+		try {
+			downLatch = new CountDownLatch(formigasDisponiveis.size());
 
-		executor.shutdownNow();
-		executorWait.shutdownNow();
+			// Aciona o processamento das formigas
+			formigaExecutionFuture = executor.submit(new FormigaExecution(formigasDisponiveis));
+
+			downLatch.await();
+			this.stop();
+
+			executor.shutdownNow();
+		} catch (InterruptedException e) {
+			throw new RuntimeException("Houve um erro na execucao do programa.", e);
+		}
 	}
 
 	public void stop() {
 		formigaExecutionFuture.cancel(true);
-	}
-
-	public void waitForAllFinished() {
-		try {
-			lock.lock();
-			canContinue.await();
-		} catch (InterruptedException e) {
-		} finally {
-			lock.unlock();
-		}
-
 	}
 
 	public class FormigaExecution implements Runnable {
@@ -92,45 +81,10 @@ public class ControladorGeral implements Runnable {
 			for (Formiga formiga : formigas.values()) {
 				try {
 					// executando a thread
-					Future<Formiga> formigaFuture = executor.submit(new MultiThreadDispatched(formiga, percurso, algoritmo, maximoIteracoes.get()));
-
-					FormigaWait formigaWait = new FormigaWait(formigaFuture);
-					executorWait.execute(formigaWait);
+					executor.submit(new MultiThreadDispatched(formiga, percurso, algoritmo, maximoIteracoes.get(), downLatch));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			}
-		}
-	}
-
-	public class FormigaWait implements Runnable {
-
-		Future<Formiga>	formigaFuture;
-
-		public FormigaWait(Future<Formiga> formigaFuture) {
-			this.formigaFuture = formigaFuture;
-		}
-
-		@Override
-		public void run() {
-			try {
-
-				Formiga formiga = formigaFuture.get();
-				formigasFinalizadas.putIfAbsent(formiga.getId(), formiga);
-
-				logger.info("Disponiveis: " + formigasDisponiveis.size());
-				logger.info("Finalizadas: " + formigasFinalizadas.size());
-				if (formigasDisponiveis.size() == formigasFinalizadas.size()) {
-					try {
-						lock.lock();
-						logger.info("Todas as formigas finalizaram o percurso.");
-						canContinue.signal();
-					} finally {
-						lock.unlock();
-					}
-				}
-			} catch (Exception e) {
-				logger.error("Ocorreu um erro na execucao do algoritmo.", e);
 			}
 		}
 	}

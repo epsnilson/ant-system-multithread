@@ -12,7 +12,7 @@ public class NumberField extends JTextField {
 	private static final long	serialVersionUID	= -3338123483288644474L;
 
 	public NumberField() {
-		this.setDocument(new NumberFieldFilter(2));
+		this.setDocument(new NumberFieldFilter(5));
 	}
 
 	public void setLength(int length) {

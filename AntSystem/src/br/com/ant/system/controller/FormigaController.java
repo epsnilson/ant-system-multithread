@@ -88,10 +88,10 @@ public class FormigaController {
 	 * @param formiga
 	 */
 	public void clearFormiga() {
-		logger.debug("Limpando as informações da formiga");
+//		logger.debug("Limpando as informações da formiga");
 
 		Cidade localizacaoAtual = percursoController.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(0, percursoController.getCidadesPercurso().size() - 1));
-		logger.debug("Nova Localizacao Inicial: " + localizacaoAtual.getNome());
+//		logger.debug("Nova Localizacao Inicial: " + localizacaoAtual.getNome());
 
 		formiga.clear(localizacaoAtual);
 	}
