@@ -35,6 +35,6 @@ public class Notificacao {
 	}
 
 	public static enum NotificacaoEnum {
-		CAMINHO, FORMIGA, FEROMONIO;
+		CAMINHO, FORMIGA, FEROMONIO, MELHOR_CAMINHO;
 	}
 }

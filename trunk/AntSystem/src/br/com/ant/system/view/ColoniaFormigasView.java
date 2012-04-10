@@ -306,8 +306,8 @@ public class ColoniaFormigasView extends JFrame {
 
 		caminhoArquivoField = new JTextField();
 		caminhoArquivoField.setEnabled(false);
-		// caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
-		caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
+		caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
+		// caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
 
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -499,6 +499,31 @@ public class ColoniaFormigasView extends JFrame {
 	}
 
 	/**
+	 * Atualiza a aresta de feromonio no grafico.
+	 * 
+	 * @param c
+	 *            Caminho a ser atualizado.
+	 */
+	public void updateEdgeMelhorCaminho(Collection<Caminho> caminhos) {
+		for (Caminho c : caminhos) {
+			mxCell cell = (mxCell) mapEdge.get(c);
+			try {
+				graph.getModel().beginUpdate();
+				String color = null;
+				color = ";strokeColor=#00FF00";
+				String style = EDGE_STYLE + color;
+				graph.getModel().setStyle(cell, style);
+				cell = null;
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				graph.getModel().endUpdate();
+			}
+		}
+	}
+
+	/**
 	 * Adiciona o texto no console.
 	 * 
 	 * @param text
@@ -528,16 +553,10 @@ public class ColoniaFormigasView extends JFrame {
 		@Override
 		public void run() {
 			while (true) {
-				final Notificacao notificacao = NotificationController.getInstance().takeNotificacao();
+				Notificacao notificacao = NotificationController.getInstance().takeNotificacao();
 
-				SwingUtilities.invokeLater(new Runnable() {
-
-					@Override
-					public void run() {
-						Object obj = notificacao.getObj();
-						execute(notificacao, obj);
-					}
-				});
+				Object obj = notificacao.getObj();
+				execute(notificacao, obj);
 			}
 		}
 
@@ -550,6 +569,10 @@ public class ColoniaFormigasView extends JFrame {
 				Caminho c = (Caminho) obj;
 
 				updateEdgeFeromonio(c);
+			} else if (notificacao.getTipoNotificacao().equals(NotificacaoEnum.MELHOR_CAMINHO)) {
+				@SuppressWarnings("unchecked")
+				List<Caminho> caminhos = (List<Caminho>) obj;
+				updateEdgeMelhorCaminho(caminhos);
 			}
 		}
 	}
@@ -615,6 +638,12 @@ public class ColoniaFormigasView extends JFrame {
 					try {
 						get();
 						executeButton.setEnabled(true);
+
+						Notificacao notificacao = new Notificacao();
+						notificacao.setTipoNotificacao(NotificacaoEnum.MELHOR_CAMINHO);
+						notificacao.setObj(EstatisticasControler.getInstance().getMelhorCaminho());
+						
+						NotificationController.getInstance().addNotificacao(notificacao);
 
 						// EstatisticasControler.getInstance().loggerEstatisticas();
 
