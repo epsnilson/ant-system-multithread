@@ -26,7 +26,7 @@ import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Formiga;
 
-public class ControladorGeral implements Runnable {
+public class GerenciadorFormiga implements Runnable {
 
 	@SuppressWarnings("rawtypes")
 	private Future								formigaExecutionFuture;
@@ -41,7 +41,7 @@ public class ControladorGeral implements Runnable {
 
 	private CountDownLatch						downLatch;
 
-	public ControladorGeral(ASAlgoritmo algoritmo, PercursoController percurso) {
+	public GerenciadorFormiga(ASAlgoritmo algoritmo, PercursoController percurso) {
 		this.algoritmo = algoritmo;
 		this.percurso = percurso;
 	}
@@ -63,7 +63,7 @@ public class ControladorGeral implements Runnable {
 			downLatch = new CountDownLatch(formigasDisponiveis.size());
 
 			// Aciona o processamento das formigas
-			formigaExecutionFuture = executor.submit(new FormigaExecution(formigasDisponiveis));
+			formigaExecutionFuture = executor.submit(new FormigaDispatcher(formigasDisponiveis));
 
 			downLatch.await();
 			this.stop();
@@ -78,11 +78,11 @@ public class ControladorGeral implements Runnable {
 		formigaExecutionFuture.cancel(true);
 	}
 
-	public class FormigaExecution implements Runnable {
+	public class FormigaDispatcher implements Runnable {
 
 		ConcurrentHashMap<Integer, Formiga>	formigas;
 
-		public FormigaExecution(ConcurrentHashMap<Integer, Formiga> formigas) {
+		public FormigaDispatcher(ConcurrentHashMap<Integer, Formiga> formigas) {
 			this.formigas = formigas;
 		}
 
@@ -91,7 +91,7 @@ public class ControladorGeral implements Runnable {
 			for (Formiga formiga : formigas.values()) {
 				try {
 					// executando a thread
-					executor.submit(new MultiThreadDispatched(formiga, percurso, algoritmo, maximoIteracoes.get(), downLatch));
+					executor.submit(new FormigaThreadExecutor(formiga, percurso, algoritmo, maximoIteracoes.get(), downLatch));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

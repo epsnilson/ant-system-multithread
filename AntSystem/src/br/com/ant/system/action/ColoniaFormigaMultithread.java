@@ -22,7 +22,7 @@ import java.util.concurrent.Future;
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Formiga;
-import br.com.ant.system.multithread.controller.ControladorGeral;
+import br.com.ant.system.multithread.controller.GerenciadorFormiga;
 import br.com.ant.system.util.AntSystemUtil;
 
 /**
@@ -32,14 +32,14 @@ import br.com.ant.system.util.AntSystemUtil;
  */
 public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface {
 
-	private ControladorGeral	control;
+	private GerenciadorFormiga	control;
 	private int					maximoIteracoes;
 
 	@SuppressWarnings("rawtypes")
 	Future						controlFuture;
 
 	public ColoniaFormigaMultithread(PercursoController percurso, ASAlgoritmo algoritmo) {
-		control = new ControladorGeral(algoritmo, percurso);
+		control = new GerenciadorFormiga(algoritmo, percurso);
 		algoritmo.inicializarFeromonio(percurso.getCaminhosDisponiveis(), percurso.getCidadesPercurso().size());
 	}
 

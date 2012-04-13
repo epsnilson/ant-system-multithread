@@ -24,7 +24,7 @@ import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
 import br.com.ant.system.util.AntSystemUtil;
 
-public class MultiThreadDispatched implements Runnable {
+public class FormigaThreadExecutor implements Runnable {
 
 	private Formiga				formiga;
 
@@ -37,7 +37,7 @@ public class MultiThreadDispatched implements Runnable {
 
 	CountDownLatch				cdl;
 
-	public MultiThreadDispatched(Formiga formiga, PercursoController percurso, ASAlgoritmo algoritmo, int maxIteracoes, CountDownLatch cdl) {
+	public FormigaThreadExecutor(Formiga formiga, PercursoController percurso, ASAlgoritmo algoritmo, int maxIteracoes, CountDownLatch cdl) {
 		this.formiga = formiga;
 		this.percurso = percurso;
 		this.algoritmo = algoritmo;
