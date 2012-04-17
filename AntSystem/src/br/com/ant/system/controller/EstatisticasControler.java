@@ -14,8 +14,14 @@
  */
 package br.com.ant.system.controller;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -139,23 +145,69 @@ public class EstatisticasControler {
 		return numeroIteracoes;
 	}
 
-	public void loggerEstatisticas() {
-		logger.info("***********************************************************************************************");
-		logger.info("**************************************Estatisticas*******************************************");
-		logger.info("***********************************************************************************************");
-		logger.info("Quantidade de Iteracoes: " + numeroIteracoes);
-		logger.info("Menor caminho: " + menorCaminhoPercorrido);
-		logger.info("Melhor trajeto: " + Arrays.toString(melhorCaminho.toArray()));
-		logger.info("Tempo Gasto no melhor caminho: " + tempoGastoMelhorCaminho + " ms");
-		logger.info("Quantidade de solucoes encontradas: " + estatisticas.size());
-		logger.info("***********************************************************************************************");
+	public synchronized void loggerEstatisticas(boolean multiThread) {
+		BufferedOutputStream outputStream = gerarArquivoEstatistica(multiThread);
+		print("***********************************************************************************************", outputStream);
+		print("**************************************Estatisticas*******************************************", outputStream);
+		print("***********************************************************************************************", outputStream);
+		print(String.format("Tempo gasto na execucao do algoritmo: %s", new SimpleDateFormat("mm:ss:SSS").format(new Date(EstatisticasControler.getInstance().getHorarioFinal() - EstatisticasControler.getInstance().getHorarioInicial()))),
+				outputStream);
+		print(String.format("Quantidade de Iteracoes: %s", numeroIteracoes), outputStream);
+		print(String.format("Menor caminho: %s", menorCaminhoPercorrido), outputStream);
+		print("", outputStream);
+		print("Melhor trajeto: ", outputStream);
+		print("", outputStream);
+		for (Caminho c : melhorCaminho) {
+			print(String.format("%s ====== %s =====> %s", c.getCidadeOrigem(), c.getDistancia(), c.getCidadeDestino()), outputStream);
+		}
+		print("", outputStream);
+		print(String.format("Tempo Gasto no melhor caminho: %s ms", tempoGastoMelhorCaminho), outputStream);
+		print(String.format("Quantidade de solucoes encontradas: %s", estatisticas.size()), outputStream);
+		print("***********************************************************************************************", outputStream);
 		for (Estatistica e : estatisticas) {
-			logger.info("FormigaID: " + e.getFormigaId());
-			logger.info("Cidade Inicial: " + e.getCidadeInicial());
-			logger.info("Tempo Gasto: " + e.getTempoGasto() + " ms");
-			logger.info("Distancia Percorrida: " + e.getDistanciaPercorrida());
-			logger.info("Trajeto: " + Arrays.toString(e.getCaminhoPercorrido().toArray()));
-			logger.info("***********************************************************************************************");
+			print("", outputStream);
+			print(String.format("FormigaID: %s", e.getFormigaId()), outputStream);
+			print(String.format("Cidade Inicial: %s", e.getCidadeInicial()), outputStream);
+			print(String.format("Tempo Gasto: %s ms", e.getTempoGasto()), outputStream);
+			print(String.format("Distancia Percorrida: %s ", e.getDistanciaPercorrida()), outputStream);
+			print("", outputStream);
+			print("Trajeto: ", outputStream);
+			print("", outputStream);
+			for (Caminho c : e.getCaminhoPercorrido()) {
+				print(String.format("%s ====== %s =====> %s", c.getCidadeOrigem(), c.getDistancia(), c.getCidadeDestino()), outputStream);
+			}
+			print("***********************************************************************************************", outputStream);
+		}
+
+		try {
+			outputStream.close();
+		} catch (IOException e1) {
+		}
+
+		outputStream = null;
+
+	}
+
+	public BufferedOutputStream gerarArquivoEstatistica(boolean multiThread) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+		String path = multiThread ? "EstatisticasMultithread" : "EstatisticasMonotrhread";
+		path += sdf.format(new Date()) + ".txt";
+
+		File file = new File(path);
+		try {
+			FileOutputStream fileOutputStream = new FileOutputStream(file, true);
+			BufferedOutputStream outputStream = new BufferedOutputStream(fileOutputStream);
+
+			return outputStream;
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException("O arquivo nao pode ser encontrado.", e);
+		}
+	}
+
+	public void print(String text, BufferedOutputStream outputStream) {
+		try {
+			outputStream.write((text + "\n").getBytes());
+		} catch (IOException e) {
 		}
 	}
 }
