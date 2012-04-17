@@ -116,6 +116,9 @@ public class ColoniaFormigasView extends JFrame {
 
 	private JLabel							iteracoesLabel;
 	private NumberField						iteracoesField;
+
+	private JLabel							execucoesLabel;
+	private NumberField						execucoesField;
 	private JTextField						caminhoArquivoField;
 	private JScrollPane						scrollPane;
 	private JTextArea						consoleField;
@@ -289,6 +292,10 @@ public class ColoniaFormigasView extends JFrame {
 		iteracoesField = new NumberField();
 		iteracoesField.setText("999");
 
+		execucoesLabel = new JLabel("Num. Execucoes: ");
+		execucoesField = new NumberField();
+		execucoesField.setText("1");
+
 		monothreadButton = new JRadioButton("MonoThread", true);
 		multiThreadButton = new JRadioButton("MultiThread");
 
@@ -306,8 +313,8 @@ public class ColoniaFormigasView extends JFrame {
 
 		caminhoArquivoField = new JTextField();
 		caminhoArquivoField.setEnabled(false);
-		caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
-		// caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
+		// caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
+		caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
 
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -335,9 +342,11 @@ public class ColoniaFormigasView extends JFrame {
 		executeButton = new JButton(new ExecutarAction());
 
 		rightTopPanel.add(panelGroup, cc.xyw(2, 2, 4));
-		rightTopPanel.add(iteracoesLabel, cc.xy(2, 4));
-		rightTopPanel.add(iteracoesField, cc.xy(4, 4));
-		rightTopPanel.add(panelArquivo, cc.xyw(2, 6, 4));
+		rightTopPanel.add(execucoesLabel, cc.xy(2, 4));
+		rightTopPanel.add(execucoesField, cc.xy(4, 4));
+		rightTopPanel.add(iteracoesLabel, cc.xy(2, 6));
+		rightTopPanel.add(iteracoesField, cc.xy(4, 6));
+		rightTopPanel.add(panelArquivo, cc.xyw(2, 8, 4));
 		rightTopPanel.add(executeButton, cc.xyw(2, 10, 3));
 
 		return rightTopPanel;
@@ -350,7 +359,6 @@ public class ColoniaFormigasView extends JFrame {
 	 * @param formigas
 	 */
 	private void montarGrafo(Collection<Caminho> caminhos, List<Formiga> formigas) {
-		NotificationController.getInstance().clearNotification();
 		Object parent = graph.getDefaultParent();
 
 		mapEdge.clear();
@@ -589,12 +597,30 @@ public class ColoniaFormigasView extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			SwingWorker<Void, Void> worker = createWorker();
+			worker.execute();
+		}
+
+		private SwingWorker<Void, Void> createWorker() {
 			SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 				@Override
 				protected Void doInBackground() throws Exception {
 					executeButton.setEnabled(false);
 
+					int numExec = Integer.parseInt(execucoesField.getText());
+					for (int i = 0; i < numExec; i++) {
+
+						this.executeAlgoritmo();
+					}
+
+					return null;
+				}
+
+				private void executeAlgoritmo() {
 					EstatisticasControler.getInstance().clear();
+					NotificationController.getInstance().clearNotification();
+
+					EstatisticasControler.getInstance().setNumeroIteracoes(Integer.parseInt(iteracoesField.getText()));
 					percurso = new PercursoController();
 
 					addConsoleText("Importando o arquivos de cidades...");
@@ -616,9 +642,13 @@ public class ColoniaFormigasView extends JFrame {
 					EstatisticasControler.getInstance().setHorarioInicial(inicial);
 					if (multiThreadButton.isSelected()) {
 						addConsoleText("Iniciando a execução do algoritmo em multiplas threads...");
+						addConsoleText("");
+
 						executeMultiThread();
 					} else if (monothreadButton.isSelected()) {
 						addConsoleText("Iniciando a execução do algoritmo em monothread...");
+						addConsoleText("");
+
 						executeMonoThread();
 					}
 
@@ -627,10 +657,37 @@ public class ColoniaFormigasView extends JFrame {
 					// createGrafico();
 
 					EstatisticasControler.getInstance().setHorarioFinal(fim);
-					addConsoleText("Tempo Gasto: " + new SimpleDateFormat("mm:ss:SSS").format(new Date(fim - inicial)));
-					addConsoleText("Algoritmo finalizado...\n");
 
-					return null;
+					// Notifica o melhor caminho seguido.
+					notificarMelhorCaminho();
+
+					addConsoleText("Tempo Gasto na execucao: " + new SimpleDateFormat("mm:ss:SSS").format(new Date(EstatisticasControler.getInstance().getHorarioFinal() - EstatisticasControler.getInstance().getHorarioInicial())));
+
+					addConsoleText(String.format("Quantidade de Iteracoes: %s", EstatisticasControler.getInstance().getNumeroIteracoes()));
+					addConsoleText(String.format("Menor caminho: %s", EstatisticasControler.getInstance().getMenorCaminhoPercorrido()));
+					addConsoleText("");
+					addConsoleText("Melhor trajeto: ");
+					addConsoleText("");
+					for (Caminho c : EstatisticasControler.getInstance().getMelhorCaminho()) {
+						addConsoleText(String.format("%s ====== %s =====> %s", c.getCidadeOrigem(), c.getDistancia(), c.getCidadeDestino()));
+					}
+					addConsoleText("");
+					addConsoleText(String.format("Tempo Gasto no melhor caminho: %s ms", EstatisticasControler.getInstance().getTempoGastoMelhorCaminho()));
+					addConsoleText(String.format("Quantidade de solucoes encontradas: %s", EstatisticasControler.getInstance().getEstatisticas().size()));
+					addConsoleText("");
+					addConsoleText("Algoritmo finalizado...");
+					addConsoleText("");
+
+					EstatisticasControler.getInstance().loggerEstatisticas(multiThreadButton.isSelected());
+					this.clear();
+				}
+
+				private void notificarMelhorCaminho() {
+					Notificacao notificacao = new Notificacao();
+					notificacao.setTipoNotificacao(NotificacaoEnum.MELHOR_CAMINHO);
+					notificacao.setObj(EstatisticasControler.getInstance().getMelhorCaminho());
+
+					NotificationController.getInstance().addNotificacao(notificacao);
 				}
 
 				@Override
@@ -638,16 +695,6 @@ public class ColoniaFormigasView extends JFrame {
 					try {
 						get();
 						executeButton.setEnabled(true);
-
-						Notificacao notificacao = new Notificacao();
-						notificacao.setTipoNotificacao(NotificacaoEnum.MELHOR_CAMINHO);
-						notificacao.setObj(EstatisticasControler.getInstance().getMelhorCaminho());
-						
-						NotificationController.getInstance().addNotificacao(notificacao);
-
-						// EstatisticasControler.getInstance().loggerEstatisticas();
-
-						this.clear();
 
 						cancel(true);
 					} catch (Exception e) {
@@ -666,7 +713,7 @@ public class ColoniaFormigasView extends JFrame {
 					System.gc();
 				}
 			};
-			worker.execute();
+			return worker;
 		}
 
 		/**
