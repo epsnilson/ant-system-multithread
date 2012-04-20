@@ -44,11 +44,11 @@ public class ASAlgoritmo {
 	/*
 	 * Dorigo recomenda que a importancia do feromonio fique em torno de 1.
 	 */
-	private double	pesoFeromonio					= 1;
+	private double	pesoFeromonio					= 2;
 	/*
 	 * Dorigo recomenda que a importancia da visibilidade do cidade fique em torno de 5.
 	 */
-	private double	pesoVisibilidade				= 5;
+	private double	pesoVisibilidade				= 4;
 
 	/**
 	 * Escolhe o Melhor caminho apartir dos caminhos disponiveis e do algoritmo proposto pelo

@@ -37,46 +37,27 @@ import br.com.ant.system.model.Formiga;
  * @author j.duarte
  * 
  */
-public class EstatisticasControler {
+public class EstatisticaColetor {
 
-	private List<Caminho>					melhorCaminho	= new LinkedList<Caminho>();
-	private double							menorCaminhoPercorrido;
-	private long							tempoGastoMelhorCaminho;
+	private List<Caminho>		melhorCaminho	= new LinkedList<Caminho>();
+	int							id;
+	private double				menorCaminhoPercorrido;
+	private long				tempoGastoMelhorCaminho;
 
-	private int								numeroIteracoes;
+	private int					numeroIteracoes;
 
-	private long							horarioInicial;
-	private long							horarioFinal;
+	private long				horarioInicial;
+	private long				horarioFinal;
 
-	private List<Estatistica>				estatisticas	= new ArrayList<Estatistica>();
-	Logger									logger			= Logger.getLogger(this.getClass());
+	private List<Estatistica>	estatisticas	= new ArrayList<Estatistica>();
+	Logger						logger			= Logger.getLogger(this.getClass());
 
-	private static EstatisticasControler	instance;
-
-	public static EstatisticasControler getInstance() {
-		if (instance == null) {
-			instance = new EstatisticasControler();
-		}
-
-		return instance;
+	public EstatisticaColetor(int id) {
+		this.id = id;
 	}
 
-	public void clear() {
-		menorCaminhoPercorrido = 0;
-		melhorCaminho.clear();
-		tempoGastoMelhorCaminho = 0L;
-		numeroIteracoes = 0;
-		horarioFinal = 0;
-		horarioInicial = 0;
-
-		estatisticas.clear();
-	}
-
-	private EstatisticasControler() {
-	}
-
-	public synchronized void coletarEstatisticas(Formiga formiga) {
-		this.addEstatistica(formiga);
+	public synchronized void coletarEstatisticas(Formiga formiga, int iteracao) {
+		this.addEstatistica(formiga, iteracao);
 
 		if (menorCaminhoPercorrido == 0 || formiga.getDistanciaPercorrida() < menorCaminhoPercorrido) {
 			menorCaminhoPercorrido = formiga.getDistanciaPercorrida();
@@ -90,8 +71,10 @@ public class EstatisticasControler {
 		}
 	}
 
-	private void addEstatistica(Formiga formiga) {
+	private void addEstatistica(Formiga formiga, int iteracao) {
 		Estatistica estatistica = new Estatistica();
+
+		estatistica.setIteracao(iteracao);
 		estatistica.setFormigaId(formiga.getId());
 		estatistica.setDistanciaPercorrida(formiga.getDistanciaPercorrida());
 		estatistica.setTempoGasto(formiga.getTempoFinal() - formiga.getTempoInicial());
@@ -150,8 +133,8 @@ public class EstatisticasControler {
 		print("***********************************************************************************************", outputStream);
 		print("**************************************Estatisticas*******************************************", outputStream);
 		print("***********************************************************************************************", outputStream);
-		print(String.format("Tempo gasto na execucao do algoritmo: %s", new SimpleDateFormat("mm:ss:SSS").format(new Date(EstatisticasControler.getInstance().getHorarioFinal() - EstatisticasControler.getInstance().getHorarioInicial()))),
-				outputStream);
+		print(String.format("Tempo gasto na execucao do algoritmo: %s",
+				new SimpleDateFormat("mm:ss:SSS").format(new Date(EstatisticasColetorController.getEstatisticaColetor().getHorarioFinal() - EstatisticasColetorController.getEstatisticaColetor().getHorarioInicial()))), outputStream);
 		print(String.format("Quantidade de Iteracoes: %s", numeroIteracoes), outputStream);
 		print(String.format("Menor caminho: %s", menorCaminhoPercorrido), outputStream);
 		print("", outputStream);
@@ -209,5 +192,13 @@ public class EstatisticasControler {
 			outputStream.write((text + "\n").getBytes());
 		} catch (IOException e) {
 		}
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 }

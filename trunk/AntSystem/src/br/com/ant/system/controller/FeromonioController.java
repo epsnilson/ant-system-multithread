@@ -14,7 +14,9 @@
  */
 package br.com.ant.system.controller;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.model.Caminho;
@@ -48,8 +50,16 @@ public class FeromonioController {
 	public synchronized void adicionarFeromonioTrajeto(Formiga formiga) {
 		// Recupera o trajeto efetuado pela formiga
 		List<Caminho> trajetosFormigas = formiga.getTrajetoCidades();
+		Set<Caminho> caminhosAtualizados = new HashSet<Caminho>();
 
 		for (Caminho c : trajetosFormigas) {
+
+			if (caminhosAtualizados.contains(c)) {
+				continue;
+			} else {
+				caminhosAtualizados.add(c);
+			}
+
 			// Recupera a nova quantidade de feromonio atualizado.
 			double novaQntFeromonio = algoritmo.atualizarFeromonio(c.getFeromonio().getQntFeromonio(), formiga.getDistanciaPercorrida());
 			c.getFeromonio().setQntFeromonio(novaQntFeromonio);
@@ -73,7 +83,6 @@ public class FeromonioController {
 					break;
 				}
 			}
-
 		}
 	}
 
