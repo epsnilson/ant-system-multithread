@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.ant.system.algoritmo.ASAlgoritmo;
-import br.com.ant.system.controller.EstatisticasControler;
+import br.com.ant.system.controller.EstatisticasColetorController;
 import br.com.ant.system.controller.FeromonioController;
 import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
@@ -34,7 +34,7 @@ import br.com.ant.system.util.AntSystemUtil;
 public class ColoniaFormigaMonothread implements ColoniaFormigasActionInterface {
 
 	private int						maximoIteracoes;
-	private List<FormigaController>	formigas		= new ArrayList<FormigaController>();
+	private List<FormigaController>	formigas	= new ArrayList<FormigaController>();
 	private PercursoController		percursoController;
 	private FeromonioController		feromonioController;
 
@@ -75,7 +75,7 @@ public class ColoniaFormigaMonothread implements ColoniaFormigasActionInterface 
 				feromonioController.adicionarFeromonioTrajeto(controller.getFormiga());
 
 				// Coletando dados estatisticos do trajeto da formiga.
-				EstatisticasControler.getInstance().coletarEstatisticas(controller.getFormiga());
+				EstatisticasColetorController.getEstatisticaColetor().coletarEstatisticas(controller.getFormiga(), i);
 
 				// Limpando os dados da formiga
 				controller.clearFormiga();

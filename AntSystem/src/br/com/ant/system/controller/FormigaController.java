@@ -87,6 +87,7 @@ public class FormigaController {
 		AntSystemUtil.getIntance().logar("Limpando as informações da formiga");
 
 		Cidade localizacaoAtual = percursoController.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(0, percursoController.getCidadesPercurso().size() - 1));
+		// Cidade localizacaoAtual = formiga.getLocalizacaoCidadeInicial();
 		AntSystemUtil.getIntance().logar("Nova Localizacao Inicial: " + localizacaoAtual.getNome());
 
 		formiga.clear(localizacaoAtual);

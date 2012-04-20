@@ -14,12 +14,9 @@
  */
 package br.com.ant.system.view;
 
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,28 +45,21 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.apache.log4j.Logger;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 
 import br.com.ant.system.action.ColoniaFormigaMonothread;
 import br.com.ant.system.action.ColoniaFormigaMultithread;
 import br.com.ant.system.action.ColoniaFormigasActionInterface;
 import br.com.ant.system.algoritmo.ASAlgoritmo;
-import br.com.ant.system.controller.EstatisticasControler;
+import br.com.ant.system.controller.EstatisticasColetorController;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
-import br.com.ant.system.model.Estatistica;
 import br.com.ant.system.model.Formiga;
 import br.com.ant.system.notificacao.Notificacao;
 import br.com.ant.system.notificacao.Notificacao.NotificacaoEnum;
 import br.com.ant.system.notificacao.NotificationController;
 import br.com.ant.system.util.AntSystemUtil;
+import br.com.ant.system.util.ChartUtil;
 import br.com.ant.system.util.ImportarArquivoCidades;
 import br.com.ant.system.view.util.NumberField;
 
@@ -290,11 +280,11 @@ public class ColoniaFormigasView extends JFrame {
 
 		iteracoesLabel = new JLabel("Num. Iteracoes: ");
 		iteracoesField = new NumberField();
-		iteracoesField.setText("999");
+		iteracoesField.setText("99");
 
 		execucoesLabel = new JLabel("Num. Execucoes: ");
 		execucoesField = new NumberField();
-		execucoesField.setText("1");
+		execucoesField.setText("5");
 
 		monothreadButton = new JRadioButton("MonoThread", true);
 		multiThreadButton = new JRadioButton("MultiThread");
@@ -374,14 +364,25 @@ public class ColoniaFormigasView extends JFrame {
 				this.addVertexCidade(parent, c.getCidadeOrigem());
 				this.addVertexCidade(parent, c.getCidadeDestino());
 
-				this.addEdge(parent, c);
+				Caminho inverso = null;
+				for (Caminho ca : percurso.getCaminhosDisponiveis()) {
+					if (c.getCidadeOrigem().equals(ca.getCidadeDestino()) && c.getCidadeDestino().equals(ca.getCidadeOrigem())) {
+						inverso = ca;
+						break;
+					}
+				}
+
+				this.addEdge(parent, c, inverso);
 			}
 
 			for (Formiga formiga : formigas) {
 				this.addVertexFormiga(parent, formiga);
 			}
 		} finally {
-			graph.getModel().endUpdate();
+			try {
+				graph.getModel().endUpdate();
+			} catch (Exception e2) {
+			}
 		}
 
 		graphComponent.repaint();
@@ -394,7 +395,7 @@ public class ColoniaFormigasView extends JFrame {
 	 * @param parent
 	 * @param c
 	 */
-	private void addEdge(Object parent, Caminho c) {
+	private void addEdge(Object parent, Caminho c, Caminho inverso) {
 		if (!mapEdge.containsKey(c)) {
 			Object origem = mapVertexCidade.get(c.getCidadeOrigem());
 			Object destino = mapVertexCidade.get(c.getCidadeDestino());
@@ -404,6 +405,7 @@ public class ColoniaFormigasView extends JFrame {
 			mxCell obj = (mxCell) graph.insertEdge(parent, String.valueOf(c.getDistancia()), null, origem, destino, style);
 
 			mapEdge.put(c, obj);
+			mapEdge.put(inverso, obj);
 		}
 	}
 
@@ -469,7 +471,10 @@ public class ColoniaFormigasView extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			graph.getModel().endUpdate();
+			try {
+				graph.getModel().endUpdate();
+			} catch (Exception e2) {
+			}
 		}
 	}
 
@@ -501,7 +506,10 @@ public class ColoniaFormigasView extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			graph.getModel().endUpdate();
+			try {
+				graph.getModel().endUpdate();
+			} catch (Exception e2) {
+			}
 		}
 
 	}
@@ -526,7 +534,10 @@ public class ColoniaFormigasView extends JFrame {
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
-				graph.getModel().endUpdate();
+				try {
+					graph.getModel().endUpdate();
+				} catch (Exception e2) {
+				}
 			}
 		}
 	}
@@ -606,21 +617,54 @@ public class ColoniaFormigasView extends JFrame {
 				@Override
 				protected Void doInBackground() throws Exception {
 					executeButton.setEnabled(false);
+					addConsoleText("****************************************************");
+					addConsoleText("***************Iniciado a execucao******************");
+					addConsoleText("****************************************************");
 
 					int numExec = Integer.parseInt(execucoesField.getText());
+
 					for (int i = 0; i < numExec; i++) {
+						EstatisticasColetorController.newEstatisticaColetorInstance(i + 1);
+						NotificationController.getInstance().clearNotification();
+
+						addConsoleText("");
+						addConsoleText(String.format("----------------- Nro. Execucao %s ------------------", i + 1));
 
 						this.executeAlgoritmo();
+
 					}
+
+					addConsoleText("");
+					addConsoleText("Tempo Total Gasto na execucao: " + new SimpleDateFormat("mm:ss:SSS").format(new Date(EstatisticasColetorController.getTempoTotal())));
+					addConsoleText("Tempo Medio: " + new SimpleDateFormat("mm:ss:SSS").format(new Date(EstatisticasColetorController.getTempoMedio())));
+					addConsoleText("");
 
 					return null;
 				}
 
-				private void executeAlgoritmo() {
-					EstatisticasControler.getInstance().clear();
-					NotificationController.getInstance().clearNotification();
+				@Override
+				protected void done() {
+					try {
+						get();
 
-					EstatisticasControler.getInstance().setNumeroIteracoes(Integer.parseInt(iteracoesField.getText()));
+						// ChartUtil.getInstance().createTempoTotalExecucao(EstatisticasColetorController.getMapEstatisticas());
+						ChartUtil.getInstance().createCaminhoPercorrido(EstatisticasColetorController.getEstatisticaColetor());
+
+						executeButton.setEnabled(true);
+
+						this.clear();
+						cancel(true);
+					} catch (Exception e) {
+						executeButton.setEnabled(true);
+
+						logger.error("Houve um erro na execucao do algoritmo", e);
+						JOptionPane.showMessageDialog(null, e.getMessage());
+					}
+				}
+
+				private void executeAlgoritmo() {
+
+					EstatisticasColetorController.getEstatisticaColetor().setNumeroIteracoes(Integer.parseInt(iteracoesField.getText()));
 					percurso = new PercursoController();
 
 					addConsoleText("Importando o arquivos de cidades...");
@@ -639,7 +683,7 @@ public class ColoniaFormigasView extends JFrame {
 
 					long inicial = System.currentTimeMillis();
 
-					EstatisticasControler.getInstance().setHorarioInicial(inicial);
+					EstatisticasColetorController.getEstatisticaColetor().setHorarioInicial(inicial);
 					if (multiThreadButton.isSelected()) {
 						addConsoleText("Iniciando a execução do algoritmo em multiplas threads...");
 						addConsoleText("");
@@ -654,61 +698,45 @@ public class ColoniaFormigasView extends JFrame {
 
 					long fim = System.currentTimeMillis();
 
-					// createGrafico();
-
-					EstatisticasControler.getInstance().setHorarioFinal(fim);
+					EstatisticasColetorController.getEstatisticaColetor().setHorarioFinal(fim);
 
 					// Notifica o melhor caminho seguido.
 					notificarMelhorCaminho();
 
-					addConsoleText("Tempo Gasto na execucao: " + new SimpleDateFormat("mm:ss:SSS").format(new Date(EstatisticasControler.getInstance().getHorarioFinal() - EstatisticasControler.getInstance().getHorarioInicial())));
+					addConsoleText("Tempo Gasto na execucao: " + new SimpleDateFormat("mm:ss:SSS").format(new Date(EstatisticasColetorController.getEstatisticaColetor().getTempoExecucao())));
 
-					addConsoleText(String.format("Quantidade de Iteracoes: %s", EstatisticasControler.getInstance().getNumeroIteracoes()));
-					addConsoleText(String.format("Menor caminho: %s", EstatisticasControler.getInstance().getMenorCaminhoPercorrido()));
+					addConsoleText(String.format("Quantidade de Iteracoes: %s", EstatisticasColetorController.getEstatisticaColetor().getNumeroIteracoes()));
+					addConsoleText(String.format("Menor caminho: %s", EstatisticasColetorController.getEstatisticaColetor().getMenorCaminhoPercorrido()));
 					addConsoleText("");
 					addConsoleText("Melhor trajeto: ");
 					addConsoleText("");
-					for (Caminho c : EstatisticasControler.getInstance().getMelhorCaminho()) {
+					for (Caminho c : EstatisticasColetorController.getEstatisticaColetor().getMelhorCaminho()) {
 						addConsoleText(String.format("%s ====== %s =====> %s", c.getCidadeOrigem(), c.getDistancia(), c.getCidadeDestino()));
 					}
 					addConsoleText("");
-					addConsoleText(String.format("Tempo Gasto no melhor caminho: %s ms", EstatisticasControler.getInstance().getTempoGastoMelhorCaminho()));
-					addConsoleText(String.format("Quantidade de solucoes encontradas: %s", EstatisticasControler.getInstance().getEstatisticas().size()));
+					addConsoleText(String.format("Tempo Gasto no melhor caminho: %s ms", EstatisticasColetorController.getEstatisticaColetor().getTempoGastoMelhorCaminho()));
+					addConsoleText(String.format("Quantidade de solucoes encontradas: %s", EstatisticasColetorController.getEstatisticaColetor().getEstatisticas().size()));
 					addConsoleText("");
 					addConsoleText("Algoritmo finalizado...");
 					addConsoleText("");
 
-					EstatisticasControler.getInstance().loggerEstatisticas(multiThreadButton.isSelected());
-					this.clear();
+					EstatisticasColetorController.getEstatisticaColetor().loggerEstatisticas(multiThreadButton.isSelected());
 				}
 
 				private void notificarMelhorCaminho() {
 					Notificacao notificacao = new Notificacao();
 					notificacao.setTipoNotificacao(NotificacaoEnum.MELHOR_CAMINHO);
-					notificacao.setObj(EstatisticasControler.getInstance().getMelhorCaminho());
+					notificacao.setObj(EstatisticasColetorController.getEstatisticaColetor().getMelhorCaminho());
 
 					NotificationController.getInstance().addNotificacao(notificacao);
 				}
 
-				@Override
-				protected void done() {
-					try {
-						get();
-						executeButton.setEnabled(true);
-
-						cancel(true);
-					} catch (Exception e) {
-						executeButton.setEnabled(true);
-
-						logger.error("Houve um erro na execucao do algoritmo", e);
-						JOptionPane.showMessageDialog(null, e.getMessage());
-					}
-				}
-
 				private void clear() {
 					percurso.clear();
-					percurso = null;
 					formigas.clear();
+					percurso = null;
+
+					EstatisticasColetorController.clear();
 
 					System.gc();
 				}
@@ -752,7 +780,7 @@ public class ColoniaFormigasView extends JFrame {
 		private static final long	serialVersionUID	= 1L;
 
 		public BuscarArquivoAction() {
-			super("Escolher");
+			super("Arquivo");
 		}
 
 		@Override
@@ -761,40 +789,6 @@ public class ColoniaFormigasView extends JFrame {
 			chooser.showOpenDialog(null);
 
 			caminhoArquivoField.setText(chooser.getSelectedFile().getAbsolutePath());
-		}
-	}
-
-	public void createGrafico() {
-
-		// Create a simple XY chart
-		XYSeries series = new XYSeries("XYGraph");
-		XYSeries series1 = new XYSeries("XYGraph1");
-
-		JFrame frame = new JFrame();
-
-		for (Estatistica e : EstatisticasControler.getInstance().getEstatisticas()) {
-			series.add(e.getFormigaId(), e.getTempoGasto());
-			series1.add(e.getFormigaId(), e.getTempoGasto());
-		}
-
-		// Add the series to your data set
-		XYSeriesCollection dataset = new XYSeriesCollection();
-		dataset.addSeries(series);
-		dataset.addSeries(series1);
-
-		// Generate the graph
-		JFreeChart chart = ChartFactory.createXYLineChart("XY Chart", "x-axis", "y-axis", dataset, PlotOrientation.VERTICAL, true, true, false);
-		frame.getContentPane().add(new ChartPanel(chart));
-
-		frame.setPreferredSize(new Dimension(600, 600));
-		frame.setMinimumSize(new Dimension(600, 600));
-		frame.setMaximumSize(new Dimension(600, 600));
-		frame.setVisible(true);
-
-		try {
-			ChartUtilities.saveChartAsJPEG(new File("C:\\chart.jpg"), chart, 500, 300);
-		} catch (IOException e) {
-			System.err.println("Problem occurred creating chart.");
 		}
 	}
 }

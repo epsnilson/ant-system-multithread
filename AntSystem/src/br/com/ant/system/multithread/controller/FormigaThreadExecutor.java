@@ -17,7 +17,7 @@ package br.com.ant.system.multithread.controller;
 import java.util.concurrent.CountDownLatch;
 
 import br.com.ant.system.algoritmo.ASAlgoritmo;
-import br.com.ant.system.controller.EstatisticasControler;
+import br.com.ant.system.controller.EstatisticasColetorController;
 import br.com.ant.system.controller.FeromonioController;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Cidade;
@@ -58,10 +58,11 @@ public class FormigaThreadExecutor implements Runnable {
 			feromonioController.adicionarFeromonioTrajeto(formiga);
 
 			// Coletando informacoes para estatisticas.
-			EstatisticasControler.getInstance().coletarEstatisticas(formiga);
+			EstatisticasColetorController.getEstatisticaColetor().coletarEstatisticas(formiga, formiga.getQntIteracaoExecutadas());
 
 			// Limpando os dados da formiga.
 			Cidade localizacaoAtual = percurso.getCidadesPercurso().get(AntSystemUtil.getIntance().getAleatorio(0, percurso.getCidadesPercurso().size() - 1));
+			// Cidade localizacaoAtual = formiga.getLocalizacaoCidadeInicial();
 			formiga.clear(localizacaoAtual);
 
 			int qntIteracoesExecutadas = formiga.getQntIteracaoExecutadas();

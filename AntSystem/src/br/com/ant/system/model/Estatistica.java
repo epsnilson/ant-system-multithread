@@ -19,6 +19,7 @@ import java.util.List;
 
 public class Estatistica {
 	private int				formigaId;
+	private int				iteracao;
 	private long			tempoGasto;
 	private double			distanciaPercorrida;
 	private Cidade			cidadeInicial;
@@ -63,6 +64,14 @@ public class Estatistica {
 
 	public void setCidadeInicial(Cidade cidadeInicial) {
 		this.cidadeInicial = cidadeInicial;
+	}
+
+	public int getIteracao() {
+		return iteracao;
+	}
+
+	public void setIteracao(int iteracao) {
+		this.iteracao = iteracao;
 	}
 
 }
