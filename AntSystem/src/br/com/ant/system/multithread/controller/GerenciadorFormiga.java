@@ -46,16 +46,6 @@ public class GerenciadorFormiga implements Runnable {
 		this.percurso = percurso;
 	}
 
-	public void setPercurso(PercursoController percurso) {
-		this.percurso = percurso;
-	}
-
-	public void setFormigasDisponiveis(Collection<Formiga> formigasDisponiveis) {
-		for (Formiga formiga : formigasDisponiveis) {
-			this.formigasDisponiveis.putIfAbsent(formiga.getId(), formiga);
-		}
-	}
-
 	@Override
 	public void run() {
 
@@ -71,6 +61,16 @@ public class GerenciadorFormiga implements Runnable {
 			executor.shutdownNow();
 		} catch (InterruptedException e) {
 			throw new RuntimeException("Houve um erro na execucao do programa.", e);
+		}
+	}
+
+	public void setPercurso(PercursoController percurso) {
+		this.percurso = percurso;
+	}
+
+	public void setFormigasDisponiveis(Collection<Formiga> formigasDisponiveis) {
+		for (Formiga formiga : formigasDisponiveis) {
+			this.formigasDisponiveis.putIfAbsent(formiga.getId(), formiga);
 		}
 	}
 
