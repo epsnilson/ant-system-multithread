@@ -26,7 +26,7 @@ import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Formiga;
 
-public class GerenciadorFormiga implements Runnable {
+public class GerenciadorFormigaExecution implements Runnable {
 
 	@SuppressWarnings("rawtypes")
 	private Future								formigaExecutionFuture;
@@ -41,7 +41,7 @@ public class GerenciadorFormiga implements Runnable {
 
 	private CountDownLatch						downLatch;
 
-	public GerenciadorFormiga(ASAlgoritmo algoritmo, PercursoController percurso) {
+	public GerenciadorFormigaExecution(ASAlgoritmo algoritmo, PercursoController percurso) {
 		this.algoritmo = algoritmo;
 		this.percurso = percurso;
 	}

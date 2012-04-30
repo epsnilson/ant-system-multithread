@@ -526,7 +526,7 @@ public class ColoniaFormigasView extends JFrame {
 			try {
 				graph.getModel().beginUpdate();
 				String color = null;
-				color = ";strokeColor=#00FF00";
+				color = ";strokeColor=#FF0000";
 				String style = EDGE_STYLE + color;
 				graph.getModel().setStyle(cell, style);
 				cell = null;
