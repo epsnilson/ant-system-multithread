@@ -19,7 +19,6 @@ import java.util.List;
 
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.EstatisticasColetorController;
-import br.com.ant.system.controller.FeromonioController;
 import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Formiga;
@@ -36,11 +35,9 @@ public class ColoniaFormigaMonothread implements ColoniaFormigasActionInterface 
 	private int						maximoIteracoes;
 	private List<FormigaController>	formigas	= new ArrayList<FormigaController>();
 	private PercursoController		percursoController;
-	private FeromonioController		feromonioController;
 
 	public ColoniaFormigaMonothread(List<Formiga> formigas, ASAlgoritmo algoritmo, PercursoController percurso) {
 		this.percursoController = percurso;
-		this.feromonioController = new FeromonioController(algoritmo, percursoController);
 
 		for (Formiga formiga : formigas) {
 			this.formigas.add(new FormigaController(formiga, percursoController, algoritmo));
@@ -72,7 +69,7 @@ public class ColoniaFormigaMonothread implements ColoniaFormigasActionInterface 
 				controller.getFormiga().setTempoFinal(System.currentTimeMillis());
 
 				// Adiciona Feromonio ao trajeto percorrido pela formiga
-				feromonioController.adicionarFeromonioTrajeto(controller.getFormiga());
+				controller.adicionarFeromonioTrajeto();
 
 				// Coletando dados estatisticos do trajeto da formiga.
 				EstatisticasColetorController.getEstatisticaColetor().coletarEstatisticas(controller.getFormiga(), i);
