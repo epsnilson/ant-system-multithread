@@ -18,7 +18,7 @@ import java.util.concurrent.CountDownLatch;
 
 import br.com.ant.system.algoritmo.ASAlgoritmo;
 import br.com.ant.system.controller.EstatisticasColetorController;
-import br.com.ant.system.controller.FeromonioController;
+import br.com.ant.system.controller.FormigaController;
 import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
@@ -27,35 +27,29 @@ import br.com.ant.system.util.AntSystemUtil;
 public class FormigaThreadExecutor implements Runnable {
 
 	private Formiga				formiga;
-
 	private PercursoController	percurso;
-	private ASAlgoritmo			algoritmo;
-
 	private int					maxIteracoes;
-
-	FeromonioController			feromonioController;
+	private FormigaController	formigaController;
 
 	CountDownLatch				cdl;
 
 	public FormigaThreadExecutor(Formiga formiga, PercursoController percurso, ASAlgoritmo algoritmo, int maxIteracoes, CountDownLatch cdl) {
 		this.formiga = formiga;
 		this.percurso = percurso;
-		this.algoritmo = algoritmo;
 		this.maxIteracoes = maxIteracoes;
 		this.cdl = cdl;
 
-		feromonioController = new FeromonioController(algoritmo, percurso);
+		this.formigaController = new FormigaController(formiga, percurso, algoritmo);
+
 	}
 
 	@Override
 	public void run() {
-		FormigaMultiThreadController controller = new FormigaMultiThreadController(this.formiga, percurso, algoritmo);
-
 		do {
-			Formiga formiga = controller.call();
+			this.executarAlgoritmoBuscaCaminho();
 
 			// Atualizando a quantidade de feromonio do trajeto da formiga.
-			feromonioController.adicionarFeromonioTrajeto(formiga);
+			formigaController.adicionarFeromonioTrajeto();
 
 			// Coletando informacoes para estatisticas.
 			EstatisticasColetorController.getEstatisticaColetor().coletarEstatisticas(formiga, formiga.getQntIteracaoExecutadas());
@@ -69,7 +63,20 @@ public class FormigaThreadExecutor implements Runnable {
 			formiga.setQntIteracaoExecutadas(qntIteracoesExecutadas + 1);
 		} while (formiga.getQntIteracaoExecutadas() < maxIteracoes);
 
-		// Diminuindo o contador de threads.
+		// Diminuindo o contador de threads. (CountDownLatch)
 		cdl.countDown();
+	}
+
+	public void executarAlgoritmoBuscaCaminho() {
+		// Setando o tempo inicial
+		formigaController.getFormiga().setTempoInicial(System.currentTimeMillis());
+
+		do {
+			// Percorrendo as cidades.
+			formigaController.escolherPercurso();
+		} while (!percurso.isFinalizouPercurso(formigaController.getFormiga()));
+
+		// Setando o tempo Final
+		formigaController.getFormiga().setTempoFinal(System.currentTimeMillis());
 	}
 }
