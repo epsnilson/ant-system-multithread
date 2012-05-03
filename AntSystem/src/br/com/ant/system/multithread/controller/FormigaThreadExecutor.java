@@ -40,7 +40,6 @@ public class FormigaThreadExecutor implements Runnable {
 		this.cdl = cdl;
 
 		this.formigaController = new FormigaController(formiga, percurso, algoritmo);
-
 	}
 
 	@Override
