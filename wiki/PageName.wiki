@@ -7,4 +7,4 @@ Neste trabalho é feito um comparativo entre a programação convencional, onde 
 
 = Detalhes =
 
-  * [Diagramas#Diagramas]
+  * [Diagramas Diagramas]
