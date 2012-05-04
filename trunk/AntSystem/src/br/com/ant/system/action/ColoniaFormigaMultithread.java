@@ -26,6 +26,7 @@ import br.com.ant.system.multithread.controller.GerenciadorFormigaExecution;
 import br.com.ant.system.util.AntSystemUtil;
 
 /**
+ * Efetua o processamento do algoritmo em multiplas threads.
  * 
  * @author j.duarte
  * 
@@ -33,20 +34,28 @@ import br.com.ant.system.util.AntSystemUtil;
 public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface {
 
 	private GerenciadorFormigaExecution	control;
-	private int					maximoIteracoes;
+	private int							maximoIteracoes;
 
 	@SuppressWarnings("rawtypes")
-	Future						controlFuture;
+	Future								controlFuture;
 
 	public ColoniaFormigaMultithread(PercursoController percurso, ASAlgoritmo algoritmo) {
 		control = new GerenciadorFormigaExecution(algoritmo, percurso);
 		algoritmo.inicializarFeromonio(percurso.getCaminhosDisponiveis(), percurso.getCidadesPercurso().size());
 	}
 
+	/**
+	 * Adiciona formigas para a execução
+	 * 
+	 * @param formigas
+	 */
 	public void addFormigas(Collection<Formiga> formigas) {
 		control.setFormigasDisponiveis(formigas);
 	}
 
+	/**
+	 * Executa o algoritmo.
+	 */
 	@Override
 	public void action() {
 		control.setMaximoIteracoes(maximoIteracoes);
