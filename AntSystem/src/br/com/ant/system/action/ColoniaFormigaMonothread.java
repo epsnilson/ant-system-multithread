@@ -80,6 +80,9 @@ public class ColoniaFormigaMonothread implements ColoniaFormigasActionInterface 
 		}
 	}
 
+	/**
+	 * Seta o numero total de iteracoes
+	 */
 	@Override
 	public void setMaximoIteracoes(int maximoIteracoes) {
 		this.maximoIteracoes = maximoIteracoes;
