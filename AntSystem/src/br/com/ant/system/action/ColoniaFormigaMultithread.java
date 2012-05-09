@@ -16,6 +16,7 @@ package br.com.ant.system.action;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
@@ -35,6 +36,7 @@ public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface
 
 	private GerenciadorFormigaExecution	control;
 	private int							maximoIteracoes;
+	private ExecutorService				executor	= Executors.newCachedThreadPool();
 
 	@SuppressWarnings("rawtypes")
 	Future								controlFuture;
@@ -61,9 +63,11 @@ public class ColoniaFormigaMultithread implements ColoniaFormigasActionInterface
 		control.setMaximoIteracoes(maximoIteracoes);
 
 		try {
-			controlFuture = Executors.newCachedThreadPool().submit(control);
+			controlFuture = executor.submit(control);
 
 			controlFuture.get();
+
+			executor.shutdown();
 		} catch (InterruptedException e) {
 			AntSystemUtil.getIntance().logar("A Thread de controle foi interrompida.");
 		} catch (ExecutionException e) {
