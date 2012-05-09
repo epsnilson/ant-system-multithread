@@ -23,6 +23,8 @@ public class NotificationController {
 	LinkedBlockingDeque<Notificacao>		notificacoes	= new LinkedBlockingDeque<Notificacao>();
 	Logger									logger			= Logger.getLogger(this.getClass());
 
+	boolean									disable;
+
 	private static NotificationController	instance;
 
 	public static NotificationController getInstance() {
@@ -36,19 +38,29 @@ public class NotificationController {
 	private NotificationController() {
 	}
 
+	public void disable() {
+		disable = true;
+	}
+
 	public void addNotificacao(Notificacao notificao) {
-		try {
-			notificacoes.put(notificao);
-		} catch (InterruptedException e) {
-			logger.error("Nao foi possivel incluir a notificacao da fila", e);
+		if (disable) {
+			try {
+				notificacoes.put(notificao);
+			} catch (InterruptedException e) {
+				logger.error("Nao foi possivel incluir a notificacao da fila", e);
+			}
 		}
 	}
 
 	public Notificacao takeNotificacao() {
-		try {
-			return notificacoes.take();
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
+		if (disable) {
+			try {
+				return notificacoes.take();
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return null;
 		}
 	}
 
