@@ -1,2 +1,2 @@
 Main-Class: br.com.ant.system.app.AntSystemApp
-Class-Path: commons/commons-lang-2.4.jar jgraph/jgraphx.jar log4j/log4j-1.2.9.jar
+Class-Path: commons/commons-lang-2.4.jar jgraph/jgraphx.jar log4j/log4j-1.2.9.jar jgoodies/binding-2.0.5.jar jgoodies/forms-1.2.1.jar log4j/log4j-1.2.9.jar jfreechart/gnujaxp.jar jfreechart/iText-2.1.5.jar jfreechart/jcommon-1.0.17.jar jfreechart/jfreechart-1.0.14-experimental.jar jfreechart/jfreechart-1.0.14-swt.jar jfreechart/jfreechart-1.0.14.jar jfreechart/junit.jar jfreechart/servlet.jar jfreechart/swtgraphics2d.jar  

@@ -12,7 +12,9 @@
 	<path id="project.class.path">
 		<fileset dir="${lib}">
 			<include name="commons/*.jar" />
+			<include name="jgoodies/*.jar" />
 			<include name="jgraph/*.jar" />
+			<include name="jfreechart/*.jar" />
 			<include name="log4j/*.jar" />
 		</fileset>
 	</path>
@@ -40,6 +42,8 @@
 			<fileset dir="${lib}">
 				<include name="commons/*.jar" />
 				<include name="jgraph/*.jar" />
+				<include name="jfreechart/*.jar" />
+				<include name="jgoodies/*.jar" />
 				<include name="log4j/*.jar" />
 			</fileset>
 		</copy>
