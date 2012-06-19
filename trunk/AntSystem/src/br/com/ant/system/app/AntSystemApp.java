@@ -52,19 +52,13 @@ public class AntSystemApp {
 	private String	pathArquivo;
 
 	public static void main(String[] args) {
+		String exec = args.length > 0 ? args[0] : null;
 
-		if (args.length == 0) {
-			errorMessage();
-		}
-
-		String exec = args[0];
-		if (exec.equals("-gui")) {
-			executeView();
-		} else if (exec.equals("-nogui")) {
+		if (StringUtils.isNotEmpty(exec) && exec.equals("-nogui")) {
 			AntSystemApp app = new AntSystemApp();
 			app.executeNoView(args);
 		} else {
-			errorMessage();
+			executeView();
 		}
 
 	}
