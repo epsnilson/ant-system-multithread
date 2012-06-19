@@ -45,6 +45,7 @@ public class EstatisticaColetor {
 	private long				tempoGastoMelhorCaminho;
 
 	private int					numeroIteracoes;
+	private int					qntSolucoesEncotradas;
 
 	private long				horarioInicial;
 	private long				horarioFinal;
@@ -57,7 +58,8 @@ public class EstatisticaColetor {
 	}
 
 	public synchronized void coletarEstatisticas(Formiga formiga, int iteracao) {
-		this.addEstatistica(formiga, iteracao);
+		// this.addEstatistica(formiga, iteracao);
+		qntSolucoesEncotradas++;
 
 		if (menorCaminhoPercorrido == 0 || formiga.getDistanciaPercorrida() < menorCaminhoPercorrido) {
 			menorCaminhoPercorrido = formiga.getDistanciaPercorrida();
@@ -126,6 +128,10 @@ public class EstatisticaColetor {
 
 	public int getNumeroIteracoes() {
 		return numeroIteracoes;
+	}
+
+	public int getQntSolucoesEncotradas() {
+		return qntSolucoesEncotradas;
 	}
 
 	public synchronized void loggerEstatisticas(boolean multiThread) {
@@ -200,5 +206,9 @@ public class EstatisticaColetor {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public void setEstatisticas(List<Estatistica> estatisticas) {
+		this.estatisticas = estatisticas;
 	}
 }

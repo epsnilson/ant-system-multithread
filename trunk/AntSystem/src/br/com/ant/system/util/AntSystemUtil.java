@@ -55,4 +55,41 @@ public class AntSystemUtil {
 			System.out.println(text);
 		}
 	}
+
+	public String horaFormatada(long total) {
+		String horas = null;
+
+		String hS = null;
+		String mS;
+		String sS;
+
+		long h = total / (1000 * 60 * 60);
+		total -= h * (1000 * 60 * 60);
+		long m = total / (1000 * 60);
+		total -= m * (1000 * 60);
+		long s = total / 1000;
+		total -= s * 1000;
+
+		if (h < 10) {
+			hS = "0" + h;
+		} else {
+			hS = String.valueOf(h);
+		}
+
+		if (m < 10) {
+			mS = "0" + m;
+		} else {
+			mS = String.valueOf(m);
+		}
+
+		if (s < 10) {
+			sS = "0" + s;
+		} else {
+			sS = String.valueOf(s);
+		}
+
+		horas = hS + ":" + mS + ":" + sS;
+
+		return horas;
+	}
 }

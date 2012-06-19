@@ -67,11 +67,6 @@ public class FormigaController {
 		formiga.addCaminho(caminhoEscolhido);
 
 		// Enviando mensagem de notificacao
-		Notificacao notificao = new Notificacao();
-		notificao.setObj(caminhoEscolhido);
-		notificao.setTipoNotificacao(NotificacaoEnum.CAMINHO);
-		NotificationController.getInstance().addNotificacao(notificao);
-
 		Notificacao notificaoFormiga = new Notificacao();
 		notificaoFormiga.setObj(formiga);
 		notificaoFormiga.setTipoNotificacao(NotificacaoEnum.FORMIGA);

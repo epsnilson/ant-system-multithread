@@ -25,7 +25,7 @@ public class NotificationController {
 
 	boolean									disable;
 
-	private static NotificationController	instance 	;
+	private static NotificationController	instance;
 
 	public static NotificationController getInstance() {
 		if (instance == null) {
@@ -43,7 +43,7 @@ public class NotificationController {
 	}
 
 	public void addNotificacao(Notificacao notificao) {
-		if (disable) {
+		if (!disable) {
 			try {
 				notificacoes.put(notificao);
 			} catch (InterruptedException e) {
@@ -60,6 +60,11 @@ public class NotificationController {
 				throw new RuntimeException(e);
 			}
 		} else {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+			}
+			
 			return null;
 		}
 	}

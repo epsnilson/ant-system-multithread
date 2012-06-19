@@ -59,7 +59,6 @@ import br.com.ant.system.notificacao.Notificacao;
 import br.com.ant.system.notificacao.Notificacao.NotificacaoEnum;
 import br.com.ant.system.notificacao.NotificationController;
 import br.com.ant.system.util.AntSystemUtil;
-import br.com.ant.system.util.ChartUtil;
 import br.com.ant.system.util.ImportarArquivoCidades;
 import br.com.ant.system.view.util.NumberField;
 
@@ -284,7 +283,7 @@ public class ColoniaFormigasView extends JFrame {
 
 		execucoesLabel = new JLabel("Num. Execucoes: ");
 		execucoesField = new NumberField();
-		execucoesField.setText("5");
+		execucoesField.setText("1");
 
 		monothreadButton = new JRadioButton("MonoThread", true);
 		multiThreadButton = new JRadioButton("MultiThread");
@@ -303,8 +302,8 @@ public class ColoniaFormigasView extends JFrame {
 
 		caminhoArquivoField = new JTextField();
 		caminhoArquivoField.setEnabled(false);
-		// caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
-		caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
+		caminhoArquivoField.setText("C:\\Users\\Sildu\\Desktop\\distancias.csv");
+		// caminhoArquivoField.setText("C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv");
 
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -648,7 +647,7 @@ public class ColoniaFormigasView extends JFrame {
 						get();
 
 						// ChartUtil.getInstance().createTempoTotalExecucao(EstatisticasColetorController.getMapEstatisticas());
-						ChartUtil.getInstance().createCaminhoPercorrido(EstatisticasColetorController.getEstatisticaColetor());
+						// ChartUtil.getInstance().createCaminhoPercorrido(EstatisticasColetorController.getEstatisticaColetor());
 
 						executeButton.setEnabled(true);
 
@@ -715,7 +714,7 @@ public class ColoniaFormigasView extends JFrame {
 					}
 					addConsoleText("");
 					addConsoleText(String.format("Tempo Gasto no melhor caminho: %s ms", EstatisticasColetorController.getEstatisticaColetor().getTempoGastoMelhorCaminho()));
-					addConsoleText(String.format("Quantidade de solucoes encontradas: %s", EstatisticasColetorController.getEstatisticaColetor().getEstatisticas().size()));
+					addConsoleText(String.format("Quantidade de solucoes encontradas: %s", EstatisticasColetorController.getEstatisticaColetor().getQntSolucoesEncotradas()));
 					addConsoleText("");
 					addConsoleText("Algoritmo finalizado...");
 					addConsoleText("");

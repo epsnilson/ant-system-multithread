@@ -17,9 +17,7 @@ package br.com.ant.system.app;
 import java.awt.DisplayMode;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +37,8 @@ import br.com.ant.system.controller.PercursoController;
 import br.com.ant.system.model.Caminho;
 import br.com.ant.system.model.Cidade;
 import br.com.ant.system.model.Formiga;
+import br.com.ant.system.notificacao.NotificationController;
+import br.com.ant.system.util.AntSystemUtil;
 import br.com.ant.system.util.ImportarArquivoCidades;
 import br.com.ant.system.view.ColoniaFormigasView;
 
@@ -54,8 +54,7 @@ public class AntSystemApp {
 	public static void main(String[] args) {
 
 		if (args.length == 0) {
-			System.out.println("Parametro de execucao invalido.");
-			System.exit(1);
+			errorMessage();
 		}
 
 		String exec = args[0];
@@ -65,8 +64,7 @@ public class AntSystemApp {
 			AntSystemApp app = new AntSystemApp();
 			app.executeNoView(args);
 		} else {
-			System.out.println("Parametro de execucao invalido.");
-			System.exit(1);
+			errorMessage();
 		}
 
 	}
@@ -92,25 +90,30 @@ public class AntSystemApp {
 		}
 
 		if (iteracoes == 0 || execucoes == 0 || StringUtils.isEmpty(pathArquivo)) {
-			System.out.println("Favor informar o numero de iteracoes, diretorio do arquivo de cidades e forma de execução");
-			System.out.println("ex.: java -jar antsystem.jar -nogui -i 10 -e 10 -d C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv -m true");
-			System.out.println("ou java -jar antsystem.jar -gui");
-			System.out.println("     -d --> diretorio do arquivo de cidades");
-			System.out.println("     -i --> iteracoes");
-			System.out.println("     -m --> execucao multithread");
-			System.out.println("     -e --> numero de execucoes");
-			System.exit(1);
+			errorMessage();
 		}
 
+		NotificationController.getInstance().disable();
 		this.executeAlgoritmo(execucoes, iteracoes, multithread, pathArquivo);
 
 		System.out.println("");
-		System.out.println("Tempo Total Gasto na execucao: " + new SimpleDateFormat("mm:ss:SSS").format(new Date(EstatisticasColetorController.getTempoTotal())));
-		System.out.println("Tempo Medio: " + new SimpleDateFormat("mm:ss:SSS").format(new Date(EstatisticasColetorController.getTempoMedio())));
+		System.out.println("Tempo Total Gasto na execucao: " + AntSystemUtil.getIntance().horaFormatada(EstatisticasColetorController.getTempoTotal()));
+		System.out.println("Tempo Medio: " + AntSystemUtil.getIntance().horaFormatada(EstatisticasColetorController.getTempoMedio()));
 		System.out.println("");
 
 		// Fechando a aplicação
 		System.exit(0);
+	}
+
+	private static void errorMessage() {
+		System.out.println("Favor informar o numero de iteracoes, diretorio do arquivo de cidades e forma de execução");
+		System.out.println("ex.: java -jar antsystem.jar -nogui -i 10 -e 10 -d C:\\Documents and Settings\\j.duarte\\Desktop\\distancias.csv -m true");
+		System.out.println("ou java -jar antsystem.jar -gui");
+		System.out.println("     -d --> diretorio do arquivo de cidades");
+		System.out.println("     -i --> iteracoes");
+		System.out.println("     -m --> execucao multithread");
+		System.out.println("     -e --> numero de execucoes");
+		System.exit(1);
 	}
 
 	private static void executeView() {
@@ -187,7 +190,7 @@ public class AntSystemApp {
 
 			EstatisticasColetorController.getEstatisticaColetor().setHorarioFinal(fim);
 
-			System.out.println("Tempo Gasto na execucao: " + new SimpleDateFormat("mm:ss:SSS").format(new Date(EstatisticasColetorController.getEstatisticaColetor().getTempoExecucao())));
+			System.out.println("Tempo Gasto na execucao: " + AntSystemUtil.getIntance().horaFormatada(EstatisticasColetorController.getEstatisticaColetor().getTempoExecucao()));
 
 			System.out.println(String.format("Quantidade de Iteracoes: %s", EstatisticasColetorController.getEstatisticaColetor().getNumeroIteracoes()));
 			System.out.println(String.format("Menor caminho: %s", EstatisticasColetorController.getEstatisticaColetor().getMenorCaminhoPercorrido()));
@@ -199,7 +202,7 @@ public class AntSystemApp {
 			}
 			System.out.println("");
 			System.out.println(String.format("Tempo Gasto no melhor caminho: %s ms", EstatisticasColetorController.getEstatisticaColetor().getTempoGastoMelhorCaminho()));
-			System.out.println(String.format("Quantidade de solucoes encontradas: %s", EstatisticasColetorController.getEstatisticaColetor().getEstatisticas().size()));
+			System.out.println(String.format("Quantidade de solucoes encontradas: %s", EstatisticasColetorController.getEstatisticaColetor().getQntSolucoesEncotradas()));
 			System.out.println("");
 			System.out.println("Algoritmo finalizado...");
 			System.out.println("");
