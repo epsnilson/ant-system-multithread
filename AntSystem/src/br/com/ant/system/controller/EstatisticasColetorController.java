@@ -40,6 +40,10 @@ public class EstatisticasColetorController {
 	}
 
 	public static synchronized EstatisticaColetor newEstatisticaColetorInstance(int id) {
+		if (estatisticasColetor != null) {
+			estatisticasColetor.getEstatisticas().clear();
+		}
+
 		estatisticasColetor = new EstatisticaColetor(id);
 		mapEstatisticas.add(estatisticasColetor);
 
